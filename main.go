@@ -33,10 +33,12 @@ func main() {
 	// extracting handleFunc from handler functions
 	registerUser := handlers.RegisterUserHandler(db)
 	loginUser := handlers.LoginUserHandler(db)
+	insertProfileImage := handlers.InsertProfileHandler(db)
 
 	// api endpoints
 	http.Handle("/api/v1/user/register", registerUser)
 	http.Handle("/api/v1/user/login", loginUser)
+	http.Handle("/api/v1/user/profile/image/update", insertProfileImage)
 
 	//listning server on localhost
 	if err := http.ListenAndServe("127.0.0.1:"+port, nil); err != nil {
