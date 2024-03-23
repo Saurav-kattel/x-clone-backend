@@ -6,3 +6,8 @@ type RegisterPayload struct {
 	Password        string `json:"password"`
 	ConfirmPassword string `json:"confirm_password"`
 }
+
+type LoginPayload struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}

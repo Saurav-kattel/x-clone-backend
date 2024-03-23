@@ -10,4 +10,5 @@ type User struct {
 	Password  string    `db:"password"`
 	ImageId   any       `db:"image_id"` //profile image id
 	CreatedAt time.Time `db:"created_at"`
+	Role      string    `db:"role"`
 }

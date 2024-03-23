@@ -16,6 +16,7 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		//checking for the request method
 		if r.Method != "POST" {
 			encoder.ResponseWriter(w, http.StatusMethodNotAllowed, models.ErrorResponse{
 				Status: http.StatusMethodNotAllowed,
@@ -26,6 +27,7 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
+		//decoding req body to json
 		data, err := decoder.RegisterPayloadJsonDecoder(r)
 		if err != nil {
 			encoder.ResponseWriter(w, 400, models.ErrorResponse{
@@ -36,8 +38,9 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
-		validationErr := validator.ValidatePayload(data)
 
+		//validating request data
+		validationErr := validator.ValidatePayload(data)
 		if validationErr != nil {
 			encoder.ResponseWriter(w, 400, models.SuccessResponse{
 				Status: 400,
@@ -46,8 +49,10 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
+		//finding corrosponding user by email
 		users, queryErr := user.GetUserByEmail(db, data.Email)
 
+		// retuting if user is already available
 		if users != nil && queryErr != sql.ErrNoRows {
 			encoder.ResponseWriter(w, 401, models.ErrorResponse{
 				Status: 401,
@@ -59,7 +64,6 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		if queryErr != nil && queryErr != sql.ErrNoRows {
-
 			encoder.ResponseWriter(w, 500, models.ErrorResponse{
 				Status: 500,
 				Res: models.Message{
@@ -69,6 +73,7 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
+		// creating a new user
 		createError := user.CreateUser(db, data)
 
 		if createError != nil {
@@ -81,6 +86,7 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
+		//fetching user for id and email
 		user, err := user.GetUserByEmail(db, data.Email)
 
 		if err != nil {
@@ -96,7 +102,7 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 			)
 			return
 		}
-
+		//signing jwt with user data
 		token, tokenErr := encoder.CreateJwt(user.Email, user.Id)
 		if tokenErr != nil {
 			encoder.ResponseWriter(
@@ -113,6 +119,7 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 
 		}
 
+		//creating and appending cookie  with response header
 		cookie := &http.Cookie{
 			Name:  "auth_token_x_clone",
 			Value: token,

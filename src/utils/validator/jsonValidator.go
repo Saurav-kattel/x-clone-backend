@@ -58,6 +58,31 @@ func ValidatePayload(payload interface{}) *models.ValidatorResponse {
 			}
 		}
 
+	case *models.LoginPayload:
+		if p.Email == "" {
+			return &models.ValidatorResponse{
+				Field:   "email",
+				Message: "email field cannot be empty",
+			}
+		}
+
+		if len(p.Password) <= 5 {
+			return &models.ValidatorResponse{
+				Field:   "password",
+				Message: "invalid password",
+			}
+		}
+
+		pattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+		regex := regexp.MustCompile(pattern)
+
+		if !regex.MatchString(p.Email) {
+			return &models.ValidatorResponse{
+				Field:   "email",
+				Message: "invalid email",
+			}
+		}
+
 	default:
 		return &models.ValidatorResponse{
 			Field:   "payload",
