@@ -82,6 +82,35 @@ func ValidatePayload(payload interface{}) *models.ValidatorResponse {
 				Message: "invalid email",
 			}
 		}
+	case *models.UpdatePasswordPayload:
+
+		if len(p.ConfirmPassword) <= 5 {
+			return &models.ValidatorResponse{
+				Field:   "confirm password",
+				Message: "invalid  confirm password",
+			}
+		}
+
+		if len(p.OldPassword) <= 5 {
+			return &models.ValidatorResponse{
+				Field:   "password",
+				Message: "invalid password",
+			}
+		}
+
+		if len(p.NewPassword) <= 5 {
+			return &models.ValidatorResponse{
+				Field:   "password",
+				Message: "password too short",
+			}
+		}
+
+		if p.ConfirmPassword != p.NewPassword {
+			return &models.ValidatorResponse{
+				Field:   "password",
+				Message: "new password  did not match with confirm password",
+			}
+		}
 
 	default:
 		return &models.ValidatorResponse{

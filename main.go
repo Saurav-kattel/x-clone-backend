@@ -40,6 +40,8 @@ func main() {
 	router.HandleFunc("/api/v1/user/account/image", handlers.InsertProfileHandler(db))
 	router.HandleFunc("/api/v1/user/account/delete", handlers.DeleteUserAccountHandler(db))
 	router.HandleFunc("/api/v1/user/account/username", handlers.UpdateUsernameHandler(db))
+	router.HandleFunc("/api/v1/user/account/password", handlers.UpdatePasswordHandler(db))
+
 	server := http.Server{
 		Addr:    "localhost:4000",
 		Handler: middleware.Logger(router),
