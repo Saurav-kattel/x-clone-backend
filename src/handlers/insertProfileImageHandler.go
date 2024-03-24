@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"image"
 	_ "image/png"
 	"io"
@@ -9,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"x-clone.com/backend/src/middleware"
 	"x-clone.com/backend/src/models"
 	"x-clone.com/backend/src/user"
 	"x-clone.com/backend/src/utils/encoder"
-	"x-clone.com/backend/src/utils/validator"
 )
 
 func InsertProfileHandler(db *sqlx.DB) http.HandlerFunc {
@@ -28,51 +27,14 @@ func InsertProfileHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		authToken := r.Header.Get("auth_token_x_clone")
-
-		if authToken == "" {
-			encoder.ResponseWriter(w, http.StatusNotFound, models.ErrorResponse{
-				Status: http.StatusNotFound,
-				Res: models.Message{
-					Message: "auth token not found",
-				},
+		userData, ok := r.Context().Value(middleware.UserContextKey).(*models.User)
+		if !ok {
+			encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{
+				Status: http.StatusUnauthorized,
+				Res:    models.Message{Message: "User information not found"},
 			})
 			return
 		}
-
-		//validating user
-		userData, err := validator.ValidateJwt(authToken)
-
-		if err != nil {
-			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
-				Status: http.StatusBadRequest,
-				Res: models.Message{
-					Message: err.Error(),
-				},
-			})
-			return
-		}
-
-		userInfo, queryErr := user.GetUserByEmail(db, userData.Email)
-		if queryErr != nil {
-			if queryErr == sql.ErrNoRows {
-				encoder.ResponseWriter(w, http.StatusNotFound, models.ErrorResponse{
-					Status: http.StatusNotFound,
-					Res: models.Message{
-						Message: "user not found",
-					},
-				})
-			} else {
-				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-					Status: http.StatusInternalServerError,
-					Res: models.Message{
-						Message: queryErr.Error(),
-					},
-				})
-			}
-			return
-		}
-
 		//parsing multipart data and setting up 10MB limit
 		multipartParseErr := r.ParseMultipartForm(10 << 20)
 		if multipartParseErr != nil {
@@ -140,7 +102,7 @@ func InsertProfileHandler(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		//parsing string into uuid
-		parsedUserId, err := uuid.Parse(userData.UserId)
+		parsedUserId, err := uuid.Parse(userData.Id)
 		if err != nil {
 			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 				Status: http.StatusInternalServerError,
@@ -152,7 +114,7 @@ func InsertProfileHandler(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		var imageUuid *uuid.UUID
-		if userInfo.ImageId != nil {
+		if userData.ImageId != nil {
 			//updating profile image if there exits previous image
 			uid, err := user.UpdateProfileImage(db, parsedUserId, compressedImage)
 			if err != nil {
@@ -183,7 +145,7 @@ func InsertProfileHandler(db *sqlx.DB) http.HandlerFunc {
 			imageUuid = uid
 		}
 
-		insertImageIdErr := user.InsertImageId(db, imageUuid.String(), userData.UserId)
+		insertImageIdErr := user.InsertImageId(db, imageUuid.String(), userData.Id)
 		if insertImageIdErr != nil {
 			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 				Status: http.StatusInternalServerError,

@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"database/sql"
 	"net/http"
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"x-clone.com/backend/src/middleware"
 	"x-clone.com/backend/src/models"
 	"x-clone.com/backend/src/user"
 	"x-clone.com/backend/src/utils/decoder"
@@ -27,31 +27,14 @@ func DeleteUserAccountHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
-
-		//checking for auth token in req.header and retrving it
-		authToken := r.Header.Get("auth_token_x_clone")
-		if authToken == "" {
-			encoder.ResponseWriter(w, http.StatusNotFound, models.ErrorResponse{
-				Status: http.StatusNotFound,
-				Res: models.Message{
-					Message: "auth token not found",
-				},
+		userData, ok := r.Context().Value(middleware.UserContextKey).(*models.User)
+		if !ok {
+			encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{
+				Status: http.StatusUnauthorized,
+				Res:    models.Message{Message: "User information not found"},
 			})
 			return
 		}
-
-		// authenticating using jwt
-		userData, err := validator.ValidateJwt(authToken)
-		if err != nil {
-			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
-				Status: http.StatusBadRequest,
-				Res: models.Message{
-					Message: err.Error(),
-				},
-			})
-			return
-		}
-
 		//decoding data coming from clinet into struct
 		data, err := decoder.DeleteAccountPayload(r)
 		if err != nil {
@@ -64,31 +47,8 @@ func DeleteUserAccountHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		// getting user by email to validate or confirm password
-		userInfo, queryErr := user.GetUserByEmail(db, userData.Email)
-		if queryErr != nil {
-			//sending error if user not found
-			if queryErr == sql.ErrNoRows {
-				encoder.ResponseWriter(w, http.StatusNotFound, models.ErrorResponse{
-					Status: http.StatusNotFound,
-					Res: models.Message{
-						Message: "user not found",
-					},
-				})
-			} else {
-				//sending error for any other unexpected error
-				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-					Status: http.StatusInternalServerError,
-					Res: models.Message{
-						Message: queryErr.Error(),
-					},
-				})
-			}
-			return
-		}
-
 		// comparing password against hash
-		validatePassword := validator.HashValidator(userInfo.Password, data.Password)
+		validatePassword := validator.HashValidator(userData.Password, data.Password)
 		if !validatePassword {
 			encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{
 				Status: http.StatusUnauthorized,
@@ -99,7 +59,7 @@ func DeleteUserAccountHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		deletionErr := user.DeleteAccount(db, userData.UserId)
+		deletionErr := user.DeleteAccount(db, userData.Id)
 
 		if deletionErr != nil {
 			encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{

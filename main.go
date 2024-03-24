@@ -35,16 +35,27 @@ func main() {
 	router := http.NewServeMux()
 
 	// Register handlers for each endpoint separately
-	router.HandleFunc("/api/v1/user/register", handlers.RegisterUserHandler(db))
-	router.HandleFunc("/api/v1/user/login", handlers.LoginUserHandler(db))
-	router.HandleFunc("/api/v1/user/account/image", handlers.InsertProfileHandler(db))
-	router.HandleFunc("/api/v1/user/account/delete", handlers.DeleteUserAccountHandler(db))
-	router.HandleFunc("/api/v1/user/account/username", handlers.UpdateUsernameHandler(db))
-	router.HandleFunc("/api/v1/user/account/password", handlers.UpdatePasswordHandler(db))
+
+	authStack := middleware.CreateStack(
+		middleware.Logger,
+		middleware.AuthMiddleware(db),
+	)
+
+	unAuthStack := middleware.CreateStack(
+		middleware.Logger,
+	)
+
+	router.Handle("/api/v1/user/register", unAuthStack(http.HandlerFunc(handlers.RegisterUserHandler(db))))
+	router.Handle("/api/v1/user/login", unAuthStack(http.HandlerFunc(handlers.LoginUserHandler(db))))
+
+	router.Handle("/api/v1/user/account/image", authStack(http.HandlerFunc(handlers.InsertProfileHandler(db))))
+	router.Handle("/api/v1/user/account/delete", authStack(http.HandlerFunc(handlers.DeleteUserAccountHandler(db))))
+	router.Handle("/api/v1/user/account/username", authStack(http.HandlerFunc(handlers.UpdateUsernameHandler(db))))
+	router.Handle("/api/v1/user/account/password", authStack(http.HandlerFunc(handlers.UpdatePasswordHandler(db))))
 
 	server := http.Server{
 		Addr:    "localhost:4000",
-		Handler: middleware.Logger(router),
+		Handler: router,
 	}
 	//listening server on localhost
 	if err := server.ListenAndServe(); err != nil {

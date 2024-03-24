@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
+	"x-clone.com/backend/src/middleware"
 	"x-clone.com/backend/src/models"
 	"x-clone.com/backend/src/user"
 	"x-clone.com/backend/src/utils/decoder"
@@ -14,6 +15,7 @@ import (
 
 func UpdatePasswordHandler(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		//validating req.method
 		if r.Method != "PUT" {
 			encoder.ResponseWriter(w, http.StatusMethodNotAllowed, models.ErrorResponse{
@@ -25,30 +27,15 @@ func UpdatePasswordHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		//checking for auth token in req.header and retrving it
-		authToken := r.Header.Get("auth_token_x_clone")
-		if authToken == "" {
-			encoder.ResponseWriter(w, http.StatusNotFound, models.ErrorResponse{
-				Status: http.StatusNotFound,
-				Res: models.Message{
-					Message: "auth token not found",
-				},
+		//using context to retrive data
+		userData, ok := r.Context().Value(middleware.UserContextKey).(*models.User)
+		if !ok {
+			encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{
+				Status: http.StatusUnauthorized,
+				Res:    models.Message{Message: "User information not found"},
 			})
 			return
 		}
-
-		// authenticating using jwt
-		userData, err := validator.ValidateJwt(authToken)
-		if err != nil {
-			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
-				Status: http.StatusBadRequest,
-				Res: models.Message{
-					Message: err.Error(),
-				},
-			})
-			return
-		}
-
 		//decoding data coming from clinet into struct
 		data, payloadErr := decoder.UpdatePasswordPayload(r)
 		if payloadErr != nil {
