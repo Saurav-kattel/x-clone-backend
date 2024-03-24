@@ -15,3 +15,7 @@ type LoginPayload struct {
 type DeleteAccountPayload struct {
 	Password string `json:"password"`
 }
+
+type UpdateUsernamePayload struct {
+	Username string `json:"username"`
+}

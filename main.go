@@ -37,9 +37,9 @@ func main() {
 	// Register handlers for each endpoint separately
 	router.HandleFunc("/api/v1/user/register", handlers.RegisterUserHandler(db))
 	router.HandleFunc("/api/v1/user/login", handlers.LoginUserHandler(db))
-	router.HandleFunc("/api/v1/user/profile/image/update", handlers.InsertProfileHandler(db))
+	router.HandleFunc("/api/v1/user/account/image", handlers.InsertProfileHandler(db))
 	router.HandleFunc("/api/v1/user/account/delete", handlers.DeleteUserAccountHandler(db))
-
+	router.HandleFunc("/api/v1/user/account/username", handlers.UpdateUsernameHandler(db))
 	server := http.Server{
 		Addr:    "localhost:4000",
 		Handler: middleware.Logger(router),
