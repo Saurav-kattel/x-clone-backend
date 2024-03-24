@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"x-clone.com/backend/src/database"
 	"x-clone.com/backend/src/handlers"
+	"x-clone.com/backend/src/middleware"
 )
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	port := os.Getenv("PORT")
+	//port := os.Getenv("PORT")
 	username := os.Getenv("USERNAME")
 	password := os.Getenv("PASSWORD")
 	dbName := os.Getenv("DB_NAME")
@@ -30,18 +31,20 @@ func main() {
 
 	log.Print("Server connected with the database.")
 
-	// extracting handleFunc from handler functions
-	registerUser := handlers.RegisterUserHandler(db)
-	loginUser := handlers.LoginUserHandler(db)
-	insertProfileImage := handlers.InsertProfileHandler(db)
+	// router
+	router := http.NewServeMux()
 
-	// api endpoints
-	http.Handle("/api/v1/user/register", registerUser)
-	http.Handle("/api/v1/user/login", loginUser)
-	http.Handle("/api/v1/user/profile/image/update", insertProfileImage)
+	// Register handlers for each endpoint separately
+	router.HandleFunc("/api/v1/user/register", handlers.RegisterUserHandler(db))
+	router.HandleFunc("/api/v1/user/login", handlers.LoginUserHandler(db))
+	router.HandleFunc("/api/v1/user/profile/image/update", handlers.InsertProfileHandler(db))
 
-	//listning server on localhost
-	if err := http.ListenAndServe("127.0.0.1:"+port, nil); err != nil {
+	server := http.Server{
+		Addr:    "localhost:4000",
+		Handler: middleware.Logger(router),
+	}
+	//listening server on localhost
+	if err := server.ListenAndServe(); err != nil {
 		log.Panic("Error starting HTTP server:", err)
 	}
 }
