@@ -11,3 +11,7 @@ type LoginPayload struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type DeleteAccountPayload struct {
+	Password string `json:"password"`
+}
