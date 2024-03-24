@@ -54,7 +54,7 @@ func InsertProfileHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		_, queryErr := user.GetUserByEmail(db, userData.Email)
+		userInfo, queryErr := user.GetUserByEmail(db, userData.Email)
 		if queryErr != nil {
 			if queryErr == sql.ErrNoRows {
 				encoder.ResponseWriter(w, http.StatusNotFound, models.ErrorResponse{
@@ -154,18 +154,40 @@ func InsertProfileHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
-		//inserting image into db
-		imageUuid, err := user.InsertProfileImage(db, parsedUserId, compressedImage)
-		if err != nil {
-			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-				Status: http.StatusInternalServerError,
-				Res: models.Message{
-					Message: err.Error(),
-				},
-			})
-			return
+
+		var imageUuid *uuid.UUID
+		//updating profile image if there exits previous image
+		if userInfo.ImageId != "" {
+			log.Print("updated")
+			uid, err := user.UpdateProfileImage(db, parsedUserId, compressedImage)
+			if err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res: models.Message{
+						Message: err.Error(),
+					},
+				})
+				return
+			}
+
+			imageUuid = uid
+
+		} else {
+			//inserting image into db if there doesn't exist previous image
+			uid, err := user.InsertProfileImage(db, parsedUserId, compressedImage)
+			if err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res: models.Message{
+						Message: err.Error(),
+					},
+				})
+				return
+			}
+
+			imageUuid = uid
 		}
-		//updating user table with image uuid
+
 		insertImageIdErr := user.InsertImageId(db, imageUuid.String(), userData.UserId)
 		if insertImageIdErr != nil {
 			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
@@ -176,7 +198,6 @@ func InsertProfileHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
-
 		encoder.ResponseWriter(w, 200, models.SuccessResponse{
 			Status: 200,
 			Res:    "updated image successfully",
