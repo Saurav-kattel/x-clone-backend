@@ -10,7 +10,7 @@ type User struct {
 	Username  string    `db:"username"`
 	Email     string    `db:"email"`
 	Password  string    `db:"password"`
-	ImageId   string    `db:"image_id"` //profile image id
+	ImageId   any       `db:"image_id"` //profile image id
 	CreatedAt time.Time `db:"created_at"`
 	Role      string    `db:"role"`
 }

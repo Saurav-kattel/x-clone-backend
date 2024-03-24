@@ -5,7 +5,6 @@ import (
 	"image"
 	_ "image/png"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -104,10 +103,7 @@ func InsertProfileHandler(db *sqlx.DB) http.HandlerFunc {
 			}
 		}
 		//reading mulipart data from request object
-		file, data, formFileErr := r.FormFile("file")
-		log.Print(file)
-		log.Print(data.Filename)
-		log.Print(data.Header)
+		file, _, formFileErr := r.FormFile("file")
 		if formFileErr != nil {
 			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
 				Status: http.StatusBadRequest,
@@ -156,9 +152,8 @@ func InsertProfileHandler(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		var imageUuid *uuid.UUID
-		//updating profile image if there exits previous image
-		if userInfo.ImageId != "" {
-			log.Print("updated")
+		if userInfo.ImageId != nil {
+			//updating profile image if there exits previous image
 			uid, err := user.UpdateProfileImage(db, parsedUserId, compressedImage)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{

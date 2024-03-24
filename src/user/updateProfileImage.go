@@ -6,6 +6,7 @@ import (
 )
 
 func UpdateProfileImage(db *sqlx.DB, userId uuid.UUID, imageData []byte) (*uuid.UUID, error) {
+
 	query := `UPDATE  images SET image = $1 WHERE userId = $2 RETURNING id`
 
 	var imageId uuid.UUID
