@@ -25,3 +25,7 @@ type UpdatePasswordPayload struct {
 	NewPassword     string `json:"new_password"`
 	ConfirmPassword string `json:"confirm_password"`
 }
+
+type VerifyEmail struct {
+	Email string `json:"email"`
+}
