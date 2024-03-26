@@ -7,19 +7,22 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type DecodedJwtVal struct {
-	Email  string
+// "otp":   otp,
+// "otpId": otpId,
+
+type OtpJwtData struct {
+	Otp    string
 	UserId string
 }
 
-func ValidateJwt(jwtToken string) (*DecodedJwtVal, error) {
+func ValidateOtpJwt(jwtToken string) (*OtpJwtData, error) {
 	tokenString := os.Getenv("SECRET")
 
 	if len(tokenString) < 30 {
 		return nil, fmt.Errorf("invalid secret token")
 	}
-	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
 
+	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
 		if token.Method != jwt.SigningMethodHS256 {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -31,11 +34,11 @@ func ValidateJwt(jwtToken string) (*DecodedJwtVal, error) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		email, _ := claims["email"].(string)
+		otp, _ := claims["otp"].(string)
 		userId, _ := claims["userId"].(string)
 
-		return &DecodedJwtVal{
-			Email:  email,
+		return &OtpJwtData{
+			Otp:    otp,
 			UserId: userId,
 		}, nil
 	}

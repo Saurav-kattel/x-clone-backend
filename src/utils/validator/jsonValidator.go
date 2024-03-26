@@ -130,6 +130,34 @@ func ValidatePayload(payload interface{}) *models.ValidatorResponse {
 			}
 		}
 
+	case *models.UpdateForgottenPasswordPayload:
+		if len(p.Otp) != 4 {
+			return &models.ValidatorResponse{
+				Field:   "otp",
+				Message: "otp must be the length of 4",
+			}
+		}
+
+		if p.NewPassword == "" {
+			return &models.ValidatorResponse{
+				Field:   "new password",
+				Message: "new password cannot be empty",
+			}
+		}
+
+		if p.ConfirmPassword == "" {
+			return &models.ValidatorResponse{
+				Field:   "confirm password",
+				Message: "confirm password cannot be empty",
+			}
+		}
+
+		if p.ConfirmPassword != p.NewPassword {
+			return &models.ValidatorResponse{
+				Field:   "password",
+				Message: "password  did not match with re-entered password",
+			}
+		}
 	default:
 		return &models.ValidatorResponse{
 			Field:   "payload",

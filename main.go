@@ -48,6 +48,7 @@ func main() {
 	router.Handle("/api/v1/user/register", unAuthStack(http.HandlerFunc(handlers.RegisterUserHandler(db))))
 	router.Handle("/api/v1/user/login", unAuthStack(http.HandlerFunc(handlers.LoginUserHandler(db))))
 	router.Handle("/api/v1/user/verify/email", unAuthStack(http.HandlerFunc(handlers.VerifyEmailHandler(db))))
+	router.Handle("/api/v1/user/account/forgot-password", unAuthStack(http.HandlerFunc(handlers.UpdateForgottenPasswordHandler(db))))
 
 	router.Handle("/api/v1/user/account/image", authStack(http.HandlerFunc(handlers.InsertProfileHandler(db))))
 	router.Handle("/api/v1/user/account/delete", authStack(http.HandlerFunc(handlers.DeleteUserAccountHandler(db))))

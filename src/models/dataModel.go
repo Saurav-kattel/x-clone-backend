@@ -24,3 +24,8 @@ type Otp struct {
 	CreatedAt time.Time `db:"created_at"`
 	ExpiresAt time.Time `db:"expres_at"`
 }
+
+type OtpWithUser struct {
+	Otp  Otp
+	User User
+}

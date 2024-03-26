@@ -1,24 +1,50 @@
 package user
 
 import (
-	"fmt"
+	"log"
+	"time"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"x-clone.com/backend/src/models"
 )
 
-func GetOtp(db *sqlx.DB, userId *uuid.UUID) (*models.Otp, error) {
-	var data models.Otp
+type Data struct {
+	Id        string    `db:"id"`
+	Otp       string    `db:"otp"`
+	UserId    string    `db:"userId"`
+	ExpiresAt time.Time `db:"expires_at"`
+	Email     string    `db:"email"`
+}
 
-	if userId == nil {
-		return nil, fmt.Errorf("user id not found")
-	}
+func GetOtpWithUser(db *sqlx.DB, userId string) (*Data, error) {
+	var data Data
 
-	err := db.QueryRowx("SELECT * FROM otps WHERE userId = $1", userId).Scan(&data.ID, &data.Otp, &data.UserId, &data.CreatedAt, &data.ExpiresAt)
+	query := `SELECT 
+    o.id AS otp_id, 
+    o.otp, 
+    o.userId, 
+    o.expires_at, 
+    u.email AS email
+	FROM
+    otps o
+	JOIN
+    users u ON o.userId = u.id
+	WHERE
+    o.userId = $1`
+
+	err := db.QueryRowx(query, userId).Scan(
+		&data.Id,
+		&data.Otp,
+		&data.UserId,
+		&data.ExpiresAt,
+		&data.Email,
+	)
 
 	if err != nil {
+		log.Print("Error occured", err)
 		return nil, err
 	}
+
+	log.Print(data)
+
 	return &data, nil
 }

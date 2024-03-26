@@ -29,3 +29,8 @@ type UpdatePasswordPayload struct {
 type VerifyEmail struct {
 	Email string `json:"email"`
 }
+type UpdateForgottenPasswordPayload struct {
+	Otp             string `json:"otp"`
+	NewPassword     string `json:"new_password"`
+	ConfirmPassword string `json:"confirm_password"`
+}

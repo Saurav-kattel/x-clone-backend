@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -75,7 +77,7 @@ func VerifyEmailHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		_, otpErr := user.GetOtp(db, &uid)
+		_, otpErr := user.GetOtpWithUser(db, userData.Id)
 		if otpErr != nil {
 			if otpErr != sql.ErrNoRows {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
@@ -85,7 +87,7 @@ func VerifyEmailHandler(db *sqlx.DB) http.HandlerFunc {
 				return
 			}
 		} else {
-			delErr := user.DeleteOtp(db, &uid)
+			delErr := user.DeleteOtp(db, userData.Id)
 			if delErr != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
@@ -98,25 +100,36 @@ func VerifyEmailHandler(db *sqlx.DB) http.HandlerFunc {
 		// generetaing otp
 		otp := encoder.GenerateOtp()
 		// saving otp  into db and retriving data
-		otpId, err := user.CreateOtp(db, otp, uid)
-		if err != nil {
+		otpCreateErr := user.CreateOtp(db, otp, uid)
+		if otpCreateErr != nil {
 			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 				Status: http.StatusInternalServerError,
-				Res:    models.Message{Message: err.Error()},
+				Res:    models.Message{Message: otpCreateErr.Error()},
 			})
 			return
 		}
 
+		//sending message in another go routine for faster api response
 		go func(otp, email string) {
+
+			subject := "Your OTP for Password Reset"
+
+			message := fmt.Sprintf("From: X-clone %s\r\n"+
+				"Subject: %s\r\n"+
+				"Content-Type: text/html; charset=UTF-8\r\n\r\n"+
+				"<h1>OTP</h1>"+
+				"<p>Your OTP for changing the password is: <em><strong>%s</strong></em>.</p>"+
+				"<p>Please do not share this OTP with others.</p>", os.Getenv("EMAIL"), subject, otp)
+
 			//sending otp from mail to use
-			mailErr := user.SendMail(otp, userData.Email)
+			mailErr := user.SendMail(userData.Email, message)
 			if mailErr != nil {
 				log.Fatal(mailErr.Error())
 			}
 		}(otp, userData.Email)
 
 		// generating jwt for otp verification
-		otpToken, err := encoder.CreateOtpJwt(otp, otpId.String())
+		otpToken, err := encoder.CreateOtpJwt(otp, userData.Id)
 		if err != nil {
 			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
 				Status: http.StatusBadRequest,
@@ -127,7 +140,7 @@ func VerifyEmailHandler(db *sqlx.DB) http.HandlerFunc {
 
 		// generating cookies and saving to http response header
 		cookie := http.Cookie{
-			Name:    "otp_auth",
+			Name:    "otp_auth_x_clone",
 			Value:   otpToken,
 			Path:    "/",
 			Expires: time.Now().Add(time.Minute * 10),

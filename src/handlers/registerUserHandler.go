@@ -121,8 +121,10 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 
 		//creating and appending cookie  with response header
 		cookie := &http.Cookie{
-			Name:  "auth_token_x_clone",
-			Value: token,
+			Name:     "auth_token_x_clone",
+			HttpOnly: true,
+			Path:     "/",
+			Value:    token,
 		}
 		http.SetCookie(w, cookie)
 

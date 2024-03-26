@@ -7,9 +7,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func CreateOtpJwt(otp, otpId string) (string, error) {
+func CreateOtpJwt(otp, userId string) (string, error) {
 
-	if otp == "" || otpId == "" {
+	if otp == "" || userId == "" {
 		return "", fmt.Errorf("required data not found")
 	}
 
@@ -21,8 +21,8 @@ func CreateOtpJwt(otp, otpId string) (string, error) {
 
 	//signing token with otp and encoded data
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"otp":   otp,
-		"otpId": otpId,
+		"otp":    otp,
+		"userId": userId,
 	})
 
 	//signing token with secret token

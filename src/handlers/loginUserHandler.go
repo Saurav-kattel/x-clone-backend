@@ -97,8 +97,10 @@ func LoginUserHandler(db *sqlx.DB) http.HandlerFunc {
 
 		//setting up cookies
 		cookie := &http.Cookie{
-			Name:  "auth_token_x_clone",
-			Value: token,
+			Name:     "auth_token_x_clone",
+			Path:     "/",
+			HttpOnly: true,
+			Value:    token,
 		}
 		http.SetCookie(w, cookie)
 

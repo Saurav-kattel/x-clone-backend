@@ -3,12 +3,11 @@ package user
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
-func DeleteOtp(db *sqlx.DB, userId *uuid.UUID) error {
-	if userId == nil {
+func DeleteOtp(db *sqlx.DB, userId string) error {
+	if userId == "" {
 		return fmt.Errorf("otpId not found")
 	}
 

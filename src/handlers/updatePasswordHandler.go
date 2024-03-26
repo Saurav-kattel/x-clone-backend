@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/middleware"
@@ -105,6 +108,21 @@ func UpdatePasswordHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
+		go func() {
+
+			subject := "Password Reset"
+
+			message := fmt.Sprintf("From: X-clone %s\r\n"+
+				"Subject: %s\r\n"+
+				"Content-Type: text/html; charset=UTF-8\r\n\r\n"+
+				"<p>Your account password was updated, if it was not your doing please change your password</p>"+
+				os.Getenv("EMAIL"), subject)
+
+			err := user.SendMail(userData.Email, message)
+			if err != nil {
+				log.Printf("Error UpdateForgonPass: %s", err.Error())
+			}
+		}()
 		encoder.ResponseWriter(w, 200, models.SuccessResponse{
 			Status: 200,
 			Res:    "update password successfully",
