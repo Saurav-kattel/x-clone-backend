@@ -29,3 +29,6 @@ type OtpWithUser struct {
 	Otp  Otp
 	User User
 }
+
+type Tweets struct {
+}

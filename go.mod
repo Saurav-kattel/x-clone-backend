@@ -9,7 +9,12 @@ require (
 	github.com/joho/godotenv v1.5.1
 )
 
-require github.com/mattn/go-sqlite3 v1.14.22 // indirect
+require (
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	github.com/yuin/goldmark v1.4.13 // indirect
+	golang.org/x/mod v0.16.0 // indirect
+	golang.org/x/tools v0.19.0 // indirect
+)
 
 require (
 	github.com/go-sql-driver/mysql v1.8.0 // indirect

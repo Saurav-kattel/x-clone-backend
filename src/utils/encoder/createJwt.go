@@ -15,6 +15,7 @@ func CreateJwt(email, userId string) (string, error) {
 
 	//validating secret key
 	secret := []byte(os.Getenv("SECRET"))
+	fmt.Println(secret)
 	if len(secret) < 30 {
 		return "", fmt.Errorf("invalid secret token")
 	}

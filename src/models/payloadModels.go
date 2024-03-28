@@ -34,3 +34,11 @@ type UpdateForgottenPasswordPayload struct {
 	NewPassword     string `json:"new_password"`
 	ConfirmPassword string `json:"confirm_password"`
 }
+
+type TweetsPayload struct {
+	Content string `json:"content"`
+}
+
+type DeleteTweetPayload struct {
+	TweetId string `json:"tweetId"`
+}
