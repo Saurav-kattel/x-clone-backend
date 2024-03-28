@@ -55,7 +55,7 @@ func main() {
 	router.Handle("/api/v1/user/account/username", authStack(http.HandlerFunc(handlers.UpdateUsernameHandler(db))))
 	router.Handle("/api/v1/user/account/password", authStack(http.HandlerFunc(handlers.UpdatePasswordHandler(db))))
 	router.Handle("/api/v1/tweet/post", authStack(http.HandlerFunc(handlers.CreateTweetHandler(db))))
-
+	router.Handle("/api/v1/tweet/delete", authStack(http.HandlerFunc(handlers.DeleteTweetHandler(db))))
 	server := http.Server{
 		Addr:    "localhost:4000",
 		Handler: router,

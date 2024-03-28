@@ -1,2 +1,2 @@
 ALTER TABLE tweetsimages
-ADD COLUMN tweetId UUID REFERENCES tweets(id);
+ADD COLUMN IF NOT EXISTS tweetId UUID REFERENCES tweets(id);
