@@ -11,6 +11,7 @@ require (
 
 require (
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	github.com/rs/cors v1.10.1 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
 	golang.org/x/mod v0.16.0 // indirect
 	golang.org/x/tools v0.19.0 // indirect

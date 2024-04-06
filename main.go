@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"x-clone.com/backend/src/database"
 	"x-clone.com/backend/src/handlers"
-	"x-clone.com/backend/src/middleware"
 )
 
 func main() {
@@ -31,34 +31,19 @@ func main() {
 
 	log.Print("Server connected with the database.")
 
-	// router
-	router := http.NewServeMux()
+	//http endpoints/routes
+	router := handlers.Routers(db)
 
-	// Register handlers for each endpoint separately
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowCredentials: true,
+		Debug:            true,
+	})
 
-	authStack := middleware.CreateStack(
-		middleware.Logger,
-		middleware.AuthMiddleware(db),
-	)
-
-	unAuthStack := middleware.CreateStack(
-		middleware.Logger,
-	)
-
-	router.Handle("/api/v1/user/register", unAuthStack(http.HandlerFunc(handlers.RegisterUserHandler(db))))
-	router.Handle("/api/v1/user/login", unAuthStack(http.HandlerFunc(handlers.LoginUserHandler(db))))
-	router.Handle("/api/v1/user/verify/email", unAuthStack(http.HandlerFunc(handlers.VerifyEmailHandler(db))))
-	router.Handle("/api/v1/user/account/forgot-password", unAuthStack(http.HandlerFunc(handlers.UpdateForgottenPasswordHandler(db))))
-
-	router.Handle("/api/v1/user/account/image", authStack(http.HandlerFunc(handlers.InsertProfileHandler(db))))
-	router.Handle("/api/v1/user/account/delete", authStack(http.HandlerFunc(handlers.DeleteUserAccountHandler(db))))
-	router.Handle("/api/v1/user/account/username", authStack(http.HandlerFunc(handlers.UpdateUsernameHandler(db))))
-	router.Handle("/api/v1/user/account/password", authStack(http.HandlerFunc(handlers.UpdatePasswordHandler(db))))
-	router.Handle("/api/v1/tweet/post", authStack(http.HandlerFunc(handlers.CreateTweetHandler(db))))
-	router.Handle("/api/v1/tweet/delete", authStack(http.HandlerFunc(handlers.DeleteTweetHandler(db))))
 	server := http.Server{
 		Addr:    "localhost:4000",
-		Handler: router,
+		Handler: c.Handler(router),
 	}
 	//listening server on localhost
 	if err := server.ListenAndServe(); err != nil {

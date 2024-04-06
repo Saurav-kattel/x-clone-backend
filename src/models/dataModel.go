@@ -32,3 +32,17 @@ type OtpWithUser struct {
 
 type Tweets struct {
 }
+
+type UserData struct {
+	Id        string    `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	ImageId   any       `json:"imageId"` //profile image id
+	CreatedAt time.Time `json:"createdAt"`
+	Role      string    `json:"role"`
+}
+
+type ProfileImage struct {
+	Id    string `json:"id"`
+	Image []byte `json:"image"`
+}
