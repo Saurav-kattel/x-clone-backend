@@ -11,8 +11,6 @@ func Routers(db *sqlx.DB) *http.ServeMux {
 	// router
 	router := http.NewServeMux()
 
-	// Register handlers for each endpoint separately
-
 	authStack := middleware.CreateStack(
 		middleware.Logger,
 		middleware.AuthMiddleware(db),
@@ -27,6 +25,7 @@ func Routers(db *sqlx.DB) *http.ServeMux {
 	router.Handle("/api/v1/user/verify/email", unAuthStack(http.HandlerFunc(VerifyEmailHandler(db))))
 	router.Handle("/api/v1/user/account/forgot-password", unAuthStack(http.HandlerFunc(UpdateForgottenPasswordHandler(db))))
 	router.Handle("/api/v1/user/account/logout", unAuthStack(http.HandlerFunc(LogoutHandler())))
+	router.Handle("/api/v1/tweets/get", unAuthStack(http.HandlerFunc(GetTweetsHandler(db))))
 
 	router.Handle("/api/v1/user/account/image", authStack(http.HandlerFunc(InsertProfileHandler(db))))
 	router.Handle("/api/v1/user/account/delete", authStack(http.HandlerFunc(DeleteUserAccountHandler(db))))
@@ -38,5 +37,4 @@ func Routers(db *sqlx.DB) *http.ServeMux {
 	router.Handle("/api/v1/tweet/post", authStack(http.HandlerFunc(CreateTweetHandler(db))))
 	router.Handle("/api/v1/tweet/delete", authStack(http.HandlerFunc(DeleteTweetHandler(db))))
 	return router
-
 }

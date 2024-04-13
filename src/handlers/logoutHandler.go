@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"time"
 
 	"x-clone.com/backend/src/models"
 	"x-clone.com/backend/src/utils/encoder"
@@ -10,11 +9,12 @@ import (
 
 func LogoutHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		cookie := &http.Cookie{
 			Name:     "auth_token_x_clone",
 			Value:    "",
 			Path:     "/",
-			Expires:  time.Unix(0, 0),
+			MaxAge:   -1,
 			HttpOnly: true,
 		}
 

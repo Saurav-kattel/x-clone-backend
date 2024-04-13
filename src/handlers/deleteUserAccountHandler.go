@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/middleware"
@@ -75,7 +74,7 @@ func DeleteUserAccountHandler(db *sqlx.DB) http.HandlerFunc {
 			Name:     "auth_token_x_clone",
 			Value:    "",
 			Path:     "/",
-			Expires:  time.Unix(0, 0),
+			MaxAge:   -1,
 			HttpOnly: true,
 		}
 

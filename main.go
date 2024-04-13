@@ -18,12 +18,10 @@ func main() {
 	}
 
 	//port := os.Getenv("PORT")
-	username := os.Getenv("USERNAME")
-	password := os.Getenv("PASSWORD")
-	dbName := os.Getenv("DB_NAME")
 
+	connectionString := os.Getenv("CONN_STR")
 	//connecting to database
-	db, err := database.ConnectDB(username, password, dbName)
+	db, err := database.ConnectDB(connectionString)
 	if err != nil {
 		log.Panic("Error connecting to the database:", err)
 	}
@@ -37,6 +35,7 @@ func main() {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Content-Type", "auth_token_x_clone"},
 		AllowCredentials: true,
 		Debug:            true,
 	})

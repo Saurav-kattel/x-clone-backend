@@ -31,6 +31,12 @@ type OtpWithUser struct {
 }
 
 type Tweets struct {
+	Id        string     `db:"id" json:"id"`
+	Content   string     `db:"content" json:"content"`
+	UserId    string     `db:"userid" json:"userId"`
+	ImageId   string     `db:"imageid" json:"imageId"`
+	CreatedAt *time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
 }
 
 type UserData struct {
