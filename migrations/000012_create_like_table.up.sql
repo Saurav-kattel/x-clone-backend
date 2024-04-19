@@ -1,0 +1,6 @@
+
+CREATE TABLE IF NOT EXISTS likes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tweet_id UUID REFERENCES tweets(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE
+);

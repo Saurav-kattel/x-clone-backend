@@ -5,13 +5,12 @@ import (
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
-	"x-clone.com/backend/src/middleware"
 	"x-clone.com/backend/src/models"
-	"x-clone.com/backend/src/user"
+	"x-clone.com/backend/src/tweets"
 	"x-clone.com/backend/src/utils/encoder"
 )
 
-func GetProfileImageHandler(db *sqlx.DB) http.HandlerFunc {
+func GetTweetImageHandler(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
 			encoder.ResponseWriter(w, http.StatusMethodNotAllowed, models.ErrorResponse{
@@ -22,35 +21,36 @@ func GetProfileImageHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
-		userData, ok := r.Context().Value(middleware.UserContextKey).(*models.User)
-		if !ok {
-			encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{
-				Status: http.StatusUnauthorized,
-				Res:    models.Message{Message: "User information not found"},
+
+		imageId := r.URL.Query().Get("id")
+
+		if imageId == "" || imageId == "undefined" {
+			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
+				Status: http.StatusBadRequest,
+				Res: models.Message{
+					Message: "image id not found",
+				},
 			})
 			return
 		}
 
-		if userData.ImageId == nil {
-			encoder.ResponseWriter(w, http.StatusNotFound, models.ErrorResponse{
-				Status: http.StatusNotFound,
-				Res:    models.Message{Message: "profile image not found"},
-			})
-			return
-		}
+		data, err := tweets.GetTweetImage(db, imageId)
 
-		imageData, err := user.GetProfileImage(db, userData.Id, userData.ImageId)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				encoder.ResponseWriter(w, http.StatusNotFound, models.ErrorResponse{
 					Status: http.StatusNotFound,
-					Res:    models.Message{Message: "profile image not found"},
+					Res: models.Message{
+						Message: err.Error(),
+					},
 				})
 				return
 			} else {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
-					Res:    models.Message{Message: err.Error()},
+					Res: models.Message{
+						Message: err.Error(),
+					},
 				})
 				return
 			}
@@ -58,8 +58,7 @@ func GetProfileImageHandler(db *sqlx.DB) http.HandlerFunc {
 
 		encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
 			Status: http.StatusOK,
-			Res:    imageData,
+			Res:    data,
 		})
-
 	}
 }

@@ -1,12 +1,15 @@
 package database
 
 import (
+	"fmt"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-func ConnectDB(connectionString string) (*sqlx.DB, error) {
+func ConnectDB(cnStr string) (*sqlx.DB, error) {
 	// Define connection parameters
+	connectionString := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", "postgres", "saurav", "x-clone")
 
 	// Open a connection to the database
 	db, err := sqlx.Connect("postgres", connectionString)

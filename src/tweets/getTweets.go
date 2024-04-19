@@ -5,13 +5,21 @@ import (
 	"x-clone.com/backend/src/models"
 )
 
-func GetTweets(db *sqlx.DB, pageNumber, pageSize int) (*[]models.Tweets, error) {
+func GetTweets(db *sqlx.DB, pageNumber, pageSize int) ([]models.Tweets, error) {
 	tweets := []models.Tweets{}
 	offset := (pageNumber - 1) * pageSize
 
-	err := db.Select(&tweets, "SELECT * FROM tweets LIMIT $1 OFFSET $2", pageSize, offset)
+	query := `
+        SELECT t.id, t.content, t.imageid, t.created_at, t.updated_at,
+        u.id as userid, u.username as author
+        FROM tweets t
+        JOIN users u ON t.userid = u.id
+        LIMIT $1 OFFSET $2
+    `
+
+	err := db.Select(&tweets, query, pageSize, offset)
 	if err != nil {
 		return nil, err
 	}
-	return &tweets, nil
+	return tweets, nil
 }

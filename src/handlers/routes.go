@@ -8,7 +8,6 @@ import (
 )
 
 func Routers(db *sqlx.DB) *http.ServeMux {
-	// router
 	router := http.NewServeMux()
 
 	authStack := middleware.CreateStack(
@@ -20,21 +19,25 @@ func Routers(db *sqlx.DB) *http.ServeMux {
 		middleware.Logger,
 	)
 
-	router.Handle("/api/v1/user/register", unAuthStack(http.HandlerFunc(RegisterUserHandler(db))))
-	router.Handle("/api/v1/user/login", unAuthStack(http.HandlerFunc(LoginUserHandler(db))))
-	router.Handle("/api/v1/user/verify/email", unAuthStack(http.HandlerFunc(VerifyEmailHandler(db))))
-	router.Handle("/api/v1/user/account/forgot-password", unAuthStack(http.HandlerFunc(UpdateForgottenPasswordHandler(db))))
-	router.Handle("/api/v1/user/account/logout", unAuthStack(http.HandlerFunc(LogoutHandler())))
-	router.Handle("/api/v1/tweets/get", unAuthStack(http.HandlerFunc(GetTweetsHandler(db))))
+	router.Handle("/api/v1/user/register", unAuthStack(RegisterUserHandler(db)))
+	router.Handle("/api/v1/user/login", unAuthStack(LoginUserHandler(db)))
+	router.Handle("/api/v1/user/verify/email", unAuthStack(VerifyEmailHandler(db)))
+	router.Handle("/api/v1/user/account/forgot-password", unAuthStack(UpdateForgottenPasswordHandler(db)))
+	router.Handle("/api/v1/user/account/logout", unAuthStack(LogoutHandler()))
 
-	router.Handle("/api/v1/user/account/image", authStack(http.HandlerFunc(InsertProfileHandler(db))))
-	router.Handle("/api/v1/user/account/delete", authStack(http.HandlerFunc(DeleteUserAccountHandler(db))))
-	router.Handle("/api/v1/user/account/get-image", authStack(http.HandlerFunc(GetProfileImageHandler(db))))
-	router.Handle("/api/v1/user/account/username", authStack(http.HandlerFunc(UpdateUsernameHandler(db))))
-	router.Handle("/api/v1/user/account/password", authStack(http.HandlerFunc(UpdatePasswordHandler(db))))
-	router.Handle("/api/v1/user/get", authStack(http.HandlerFunc(GetUserHandler(db))))
+	router.Handle("/api/v1/tweet/author/image", unAuthStack(GetAuthorImageHandler(db)))
+	router.Handle("/api/v1/tweet/get", unAuthStack(GetTweetsHandler(db)))
+	router.Handle("/api/v1/tweet/image", unAuthStack(GetTweetImageHandler(db)))
 
-	router.Handle("/api/v1/tweet/post", authStack(http.HandlerFunc(CreateTweetHandler(db))))
-	router.Handle("/api/v1/tweet/delete", authStack(http.HandlerFunc(DeleteTweetHandler(db))))
+	router.Handle("/api/v1/user/account/image", authStack(InsertProfileHandler(db)))
+	router.Handle("/api/v1/user/account/delete", authStack(DeleteUserAccountHandler(db)))
+	router.Handle("/api/v1/user/account/get-image", authStack(GetProfileImageHandler(db)))
+	router.Handle("/api/v1/user/account/username", authStack(UpdateUsernameHandler(db)))
+	router.Handle("/api/v1/user/account/password", authStack(UpdatePasswordHandler(db)))
+	router.Handle("/api/v1/user/get", authStack(GetUserHandler(db)))
+
+	router.Handle("/api/v1/tweet/post", authStack(CreateTweetHandler(db)))
+	router.Handle("/api/v1/tweet/delete", authStack(DeleteTweetHandler(db)))
+	router.Handle("/api/v1/tweet/like", authStack(TweetLikeHandler(db)))
 	return router
 }
