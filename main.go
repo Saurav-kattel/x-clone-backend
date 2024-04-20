@@ -37,7 +37,7 @@ func main() {
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
 		AllowedHeaders:   []string{"Content-Type", "auth_token_x_clone"},
 		AllowCredentials: true,
-		Debug:            true,
+		Debug:            false,
 	})
 
 	server := http.Server{

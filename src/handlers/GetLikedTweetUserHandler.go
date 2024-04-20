@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -10,9 +9,8 @@ import (
 	"x-clone.com/backend/src/utils/encoder"
 )
 
-func LikesCountHandler(db *sqlx.DB) http.HandlerFunc {
+func GetLikedTweetUserHandler(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		if r.Method != "GET" {
 			encoder.ResponseWriter(w, http.StatusMethodNotAllowed, models.ErrorResponse{
 				Status: http.StatusMethodNotAllowed,
@@ -29,32 +27,26 @@ func LikesCountHandler(db *sqlx.DB) http.HandlerFunc {
 			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
 				Status: http.StatusBadRequest,
 				Res: models.Message{
-					Message: "invalid tweet id, got " + tweetId,
+					Message: "tweet id not found",
 				},
 			})
 			return
 		}
-		count, err := tweets.GetLikesCount(db, tweetId)
 
-		if err == sql.ErrNoRows {
-			encoder.ResponseWriter(w, http.StatusBadRequest, models.SuccessResponse{
-				Status: http.StatusBadRequest,
-				Res:    0,
-			})
-			return
-		}
-		if err != nil && err != sql.ErrNoRows {
-			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
-				Status: http.StatusBadRequest,
+		data, queryErr := tweets.GetTweetLikedUser(db, tweetId)
+		if queryErr != nil {
+			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+				Status: http.StatusInternalServerError,
 				Res: models.Message{
-					Message: err.Error(),
+					Message: queryErr.Error(),
 				},
 			})
+			return
 		}
-
 		encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
 			Status: http.StatusOK,
-			Res:    count,
+			Res:    data,
 		})
+
 	}
 }

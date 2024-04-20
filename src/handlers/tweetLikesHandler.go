@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -21,6 +23,7 @@ func TweetLikeHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
+
 		userData, ok := r.Context().Value(middleware.UserContextKey).(*models.User)
 		if !ok {
 			encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{
@@ -29,20 +32,21 @@ func TweetLikeHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
-		action := r.URL.Query().Get("a")
+
 		tweetId := r.URL.Query().Get("t_id")
 		if tweetId == "" || tweetId == "undefined" {
 			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
 				Status: http.StatusBadRequest,
 				Res: models.Message{
-					Message: "invalid action type, got " + action,
+					Message: "tweet id not found",
 				},
 			})
 			return
 		}
 
-		switch action {
-		case "like":
+		queryErr := tweets.HasUserLiked(db, userData.Id, tweetId)
+		if queryErr == sql.ErrNoRows {
+			log.Print("queryErr", queryErr.Error())
 			err := tweets.HandleLike(db, tweetId, userData.Id)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
@@ -53,7 +57,7 @@ func TweetLikeHandler(db *sqlx.DB) http.HandlerFunc {
 				})
 				return
 			}
-		case "unlike":
+		} else if queryErr == nil {
 			err := tweets.HandleUnlike(db, tweetId, userData.Id)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
@@ -64,19 +68,19 @@ func TweetLikeHandler(db *sqlx.DB) http.HandlerFunc {
 				})
 				return
 			}
-		default:
-			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
-				Status: http.StatusBadRequest,
+		} else {
+			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+				Status: http.StatusInternalServerError,
 				Res: models.Message{
-					Message: "invalid action type",
+					Message: queryErr.Error(),
 				},
 			})
 			return
 		}
+
 		encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
 			Status: http.StatusOK,
-			Res:    action + " successfull",
+			Res:    "action successful",
 		})
-
 	}
 }

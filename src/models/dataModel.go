@@ -60,3 +60,9 @@ type ProfileImage struct {
 	Id    string `json:"id"`
 	Image []byte `json:"image"`
 }
+
+type LikedUsers struct {
+	Id       string `db:"id" json:"like_id"`
+	User_id  string `db:"userid" json:"userId"`
+	Username string `db:"username" json:"username"`
+}
