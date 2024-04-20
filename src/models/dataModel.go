@@ -63,6 +63,6 @@ type ProfileImage struct {
 
 type LikedUsers struct {
 	Id       string `db:"id" json:"like_id"`
-	User_id  string `db:"userid" json:"userId"`
+	User_id  string `db:"user_id" json:"userId"`
 	Username string `db:"username" json:"username"`
 }
