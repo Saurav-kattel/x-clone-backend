@@ -66,3 +66,7 @@ type LikedUsers struct {
 	User_id  string `db:"user_id" json:"userId"`
 	Username string `db:"username" json:"username"`
 }
+
+type Follow struct {
+	FolloweeId string `json:"followeeId"`
+}

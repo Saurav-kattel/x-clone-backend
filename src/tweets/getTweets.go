@@ -14,7 +14,8 @@ func GetTweets(db *sqlx.DB, pageNumber, pageSize int) ([]models.Tweets, error) {
         u.id as userid, u.username as author
         FROM tweets t
         JOIN users u ON t.userid = u.id
-        LIMIT $1 OFFSET $2
+        ORDER BY t.created_at DESC
+        LIMIT $1 OFFSET $2 
     `
 
 	err := db.Select(&tweets, query, pageSize, offset)
