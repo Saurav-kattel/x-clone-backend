@@ -42,3 +42,9 @@ type TweetsPayload struct {
 type DeleteTweetPayload struct {
 	TweetId string `json:"tweetId"`
 }
+
+type Comment struct {
+	Comment         string  `json:"comment"`
+	TweetId         string  `json:"tweetId"`
+	ParentCommentId *string `json:"parentCommentId"`
+}

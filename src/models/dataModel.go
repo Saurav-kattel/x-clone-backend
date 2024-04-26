@@ -70,3 +70,12 @@ type LikedUsers struct {
 type Follow struct {
 	FolloweeId string `json:"followeeId"`
 }
+
+type CommentData struct {
+	Id              string    `db:"id" json:"id"`
+	Comment         string    `db:"comment" json:"comment"`
+	CreatedAt       time.Time `db:"created_at" json:"createdAt"`
+	UserId          string    `db:"user_id" json:"userId"`
+	TweetId         string    `db:"tweet_id" json:"tweet_id"`
+	ParentCommentId *string   `db:"parent_tweet_id" json:"parentTweetId"`
+}
