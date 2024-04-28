@@ -38,6 +38,7 @@ func Routers(db *sqlx.DB) *http.ServeMux {
 	router.Handle("/api/v1/user/get", authStack(GetUserHandler(db)))
 	router.Handle("/api/v1/user/follow", authStack(FollowUserHandler(db)))
 	router.Handle("/api/v1/user/is-following", authStack(IsFollowing(db)))
+	router.Handle("/api/v1/user/followers", authStack(GetFollowerList(db)))
 
 	router.Handle("/api/v1/tweet/post", authStack(CreateTweetHandler(db)))
 	router.Handle("/api/v1/tweet/delete", authStack(DeleteTweetHandler(db)))

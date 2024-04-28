@@ -79,3 +79,9 @@ type CommentData struct {
 	TweetId         string    `db:"tweet_id" json:"tweet_id"`
 	ParentCommentId *string   `db:"parent_tweet_id" json:"parentTweetId"`
 }
+
+type FollowerList struct {
+	Username string `db:"username" json:"username"`
+	UserId   string `db:"user_id" json:"user_id"`
+	Id       string `db:"id" json:"id"`
+}
