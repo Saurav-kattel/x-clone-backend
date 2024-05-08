@@ -47,5 +47,6 @@ func Routers(db *sqlx.DB) *http.ServeMux {
 	router.Handle("/api/v1/tweet/like/users", authStack(GetLikedTweetUserHandler(db)))
 	router.Handle("/api/v1/tweet/like", authStack(TweetLikeHandler(db)))
 	router.Handle("/api/v1/tweet/comment", authStack(CommentHandlers(db)))
+	router.Handle("/api/v1/tweet/user/comments", authStack(GetUserCommentsHandler(db)))
 	return router
 }

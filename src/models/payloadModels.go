@@ -47,4 +47,5 @@ type Comment struct {
 	Comment         string  `json:"comment"`
 	TweetId         string  `json:"tweet_id"`
 	ParentCommentId *string `json:"parent_comment_id"`
+	RepliedTO       string  `json:"replied_to"`
 }
