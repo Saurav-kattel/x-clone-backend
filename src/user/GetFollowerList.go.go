@@ -8,7 +8,7 @@ import (
 func GetFollowerList(db *sqlx.DB, userId string) (*[]models.FollowerList, error) {
 	var data []models.FollowerList
 
-	err := db.Select(&data, "SELECT u.username as username, u.id as user_id, f.id as id FROM followers f join users u  ON f.followee_id = u.id where follower_id = $1", userId)
+	err := db.Select(&data, "SELECT u.username AS username, u.id AS user_id, f.id AS id FROM followers f JOIN users u  ON f.follower_id = u.id WHERE followee_id = $1", userId)
 	if err != nil {
 		return nil, err
 	}

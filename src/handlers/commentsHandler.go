@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -44,6 +45,7 @@ func CommentHandlers(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
+		log.Print(data)
 
 		if data.ParentCommentId != nil {
 			err := tweets.CreateReplies(db, data.Comment, userData.Id, data.TweetId, *data.ParentCommentId)

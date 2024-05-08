@@ -77,7 +77,7 @@ type CommentData struct {
 	CreatedAt       time.Time `db:"created_at" json:"createdAt"`
 	UserId          string    `db:"user_id" json:"userId"`
 	TweetId         string    `db:"tweet_id" json:"tweet_id"`
-	ParentCommentId *string   `db:"parent_tweet_id" json:"parentTweetId"`
+	ParentCommentId *string   `db:"parent_comment_id" json:"parentTweetId"`
 }
 
 type FollowerList struct {

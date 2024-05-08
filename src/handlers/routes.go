@@ -29,6 +29,7 @@ func Routers(db *sqlx.DB) *http.ServeMux {
 	router.Handle("/api/v1/tweet/get", unAuthStack(GetTweetsHandler(db)))
 	router.Handle("/api/v1/tweet/image", unAuthStack(GetTweetImageHandler(db)))
 	router.Handle("/api/v1/tweet/like/count", unAuthStack(LikesCountHandler(db)))
+	router.Handle("/api/v1/tweet/comment/get", unAuthStack(GetCommentsHandler(db)))
 
 	router.Handle("/api/v1/user/account/image", authStack(InsertProfileHandler(db)))
 	router.Handle("/api/v1/user/account/delete", authStack(DeleteUserAccountHandler(db)))
@@ -39,6 +40,7 @@ func Routers(db *sqlx.DB) *http.ServeMux {
 	router.Handle("/api/v1/user/follow", authStack(FollowUserHandler(db)))
 	router.Handle("/api/v1/user/is-following", authStack(IsFollowing(db)))
 	router.Handle("/api/v1/user/followers", authStack(GetFollowerList(db)))
+	router.Handle("/api/v1/user/following", authStack(GetFollowingList(db)))
 
 	router.Handle("/api/v1/tweet/post", authStack(CreateTweetHandler(db)))
 	router.Handle("/api/v1/tweet/delete", authStack(DeleteTweetHandler(db)))
