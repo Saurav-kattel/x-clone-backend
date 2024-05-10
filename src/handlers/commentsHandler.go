@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -45,8 +46,8 @@ func CommentHandlers(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		if data.ParentCommentId != nil && *data.ParentCommentId == "firstReply" {
-			err := tweets.CreateReplies(db, data.Comment, userData.Id, data.TweetId, *data.ParentCommentId, data.RepliedTO)
+		if data.ParentCommentId != nil {
+			err := tweets.CreateReplies(db, data.Comment, userData.Id, data.TweetId, data.ParentCommentId, data.RepliedTO)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
@@ -58,7 +59,8 @@ func CommentHandlers(db *sqlx.DB) http.HandlerFunc {
 			}
 		}
 
-		if data.ParentCommentId == nil || *data.ParentCommentId == "" {
+		if data.ParentCommentId == nil {
+			log.Print(data)
 			err := tweets.CreateComment(db, data.Comment, userData.Id, data.TweetId)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
