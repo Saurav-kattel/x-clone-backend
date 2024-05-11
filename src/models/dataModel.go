@@ -76,6 +76,7 @@ type CommentData struct {
 	Comment         string    `db:"comment" json:"comment"`
 	CreatedAt       time.Time `db:"created_at" json:"createdAt"`
 	UserId          string    `db:"user_id" json:"userId"`
+	Username        string    `db:"username" json:"username"`
 	TweetId         string    `db:"tweet_id" json:"tweet_id"`
 	ParentCommentId *string   `db:"parent_comment_id" json:"parentTweetId"`
 }
@@ -84,4 +85,17 @@ type FollowerList struct {
 	Username string `db:"username" json:"username"`
 	UserId   string `db:"user_id" json:"user_id"`
 	Id       string `db:"id" json:"id"`
+}
+
+type ReplyData struct {
+	Id                  string  `db:"id" json:"id"`
+	Reply               string  `json:"reply" db:"reply"`
+	TweetId             string  `json:"tweet_id" db:"tweet_id"`
+	RepliedTo           string  `json:"replied_to" db:"replied_to"`
+	RepliedFrom         string  `json:"replied_from" db:"replied_from"`
+	RepliedToUsername   string  `json:"replied_to_username" db:"replied_to_username"`
+	RepliedFromUsername string  `json:"replied_from_username" db:"replied_from_username"`
+	CreatedAt           string  `json:"created_at" db:"created_at"`
+	CommentId           string  `json:"comment_id" db:"comment_id"`
+	Parent_id           *string `json:"parent_id" db:"parent_id"`
 }

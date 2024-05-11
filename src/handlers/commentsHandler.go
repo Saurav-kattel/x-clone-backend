@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"log"
+	"database/sql"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -47,20 +47,46 @@ func CommentHandlers(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		if data.ParentCommentId != nil {
-			err := tweets.CreateReplies(db, data.Comment, userData.Id, data.TweetId, data.ParentCommentId, data.RepliedTO)
-			if err != nil {
-				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-					Status: http.StatusInternalServerError,
-					Res: models.Message{
-						Message: err.Error(),
-					},
-				})
-				return
+			hasParentReply := tweets.CheckForExistingReply(db, *data.ParentCommentId)
+			// checking if the existing reply for error
+			if hasParentReply != nil {
+				// checking for not found error
+				if hasParentReply == sql.ErrNoRows {
+					//if no rows create a reply with parent comment id nil
+					err := tweets.CreateReplies(db, data.Comment, userData.Id, data.TweetId, nil, data.RepliedTO, data.CommentId)
+					if err != nil {
+						encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+							Status: http.StatusInternalServerError,
+							Res: models.Message{
+								Message: err.Error(),
+							},
+						})
+						return
+					}
+				} else {
+					encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+						Status: http.StatusInternalServerError,
+						Res: models.Message{
+							Message: hasParentReply.Error(),
+						},
+					})
+					return
+				}
+			} else {
+				err := tweets.CreateReplies(db, data.Comment, userData.Id, data.TweetId, data.ParentCommentId, data.RepliedTO, data.CommentId)
+				if err != nil {
+					encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+						Status: http.StatusInternalServerError,
+						Res: models.Message{
+							Message: err.Error(),
+						},
+					})
+					return
+				}
 			}
 		}
 
 		if data.ParentCommentId == nil {
-			log.Print(data)
 			err := tweets.CreateComment(db, data.Comment, userData.Id, data.TweetId)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
