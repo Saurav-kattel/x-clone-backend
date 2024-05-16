@@ -4,6 +4,8 @@ type RegisterPayload struct {
 	Username        string `json:"username"`
 	Email           string `json:"email"`
 	Password        string `json:"password"`
+	LastName        string `json:"lastName"`
+	FirstName       string `json:"firstName"`
 	ConfirmPassword string `json:"confirm_password"`
 }
 

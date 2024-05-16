@@ -50,19 +50,7 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		//finding corrosponding user by email
-		users, queryErr := user.GetUserByEmail(db, data.Email)
-
-		// retuting if user is already available
-		if users != nil && queryErr != sql.ErrNoRows {
-			encoder.ResponseWriter(w, 401, models.ErrorResponse{
-				Status: 401,
-				Res: models.Message{
-					Message: "user already exists",
-				},
-			})
-			return
-		}
-
+		_, queryErr := user.GetUserByEmail(db, data.Email)
 		if queryErr != nil && queryErr != sql.ErrNoRows {
 			encoder.ResponseWriter(w, 500, models.ErrorResponse{
 				Status: 500,
@@ -72,10 +60,40 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
+		// retuting if user is already available
+		if queryErr == nil {
+			encoder.ResponseWriter(w, 401, models.ErrorResponse{
+				Status: 401,
+				Res: models.Message{
+					Message: "user already exists",
+				},
+			})
+			return
+		}
 
+		_, userByUsernameErr := user.GetUserByUsername(db, data.Username)
+		if userByUsernameErr != nil && userByUsernameErr != sql.ErrNoRows {
+			encoder.ResponseWriter(w, 500, models.ErrorResponse{
+				Status: 500,
+				Res: models.Message{
+					Message: userByUsernameErr.Error(),
+				},
+			})
+			return
+		}
+
+		if userByUsernameErr == nil {
+			encoder.ResponseWriter(w, 400, models.ErrorResponse{
+				Status: 400,
+				Res: models.Message{
+					Message: "user with this username already exists",
+				},
+			})
+			return
+
+		}
 		// creating a new user
-		createError := user.CreateUser(db, data)
-
+		userId, createError := user.CreateUser(db, data)
 		if createError != nil {
 			encoder.ResponseWriter(w, 500, models.ErrorResponse{
 				Status: 500,
@@ -86,24 +104,8 @@ func RegisterUserHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		//fetching user for id and email
-		user, err := user.GetUserByEmail(db, data.Email)
-
-		if err != nil {
-			encoder.ResponseWriter(
-				w,
-				http.StatusInternalServerError,
-				models.ErrorResponse{
-					Status: http.StatusInternalServerError,
-					Res: models.Message{
-						Message: err.Error(),
-					},
-				},
-			)
-			return
-		}
 		//signing jwt with user data
-		token, tokenErr := encoder.CreateJwt(user.Email, user.Id)
+		token, tokenErr := encoder.CreateJwt(data.Email, *userId)
 		if tokenErr != nil {
 			encoder.ResponseWriter(
 				w,

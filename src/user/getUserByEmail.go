@@ -18,6 +18,8 @@ func GetUserByEmail(db *sqlx.DB, email string) (*models.User, error) {
 		&user.Role,
 		&user.ImageId,
 		&user.CreatedAt,
+		&user.FirstName,
+		&user.LastName,
 	)
 
 	if err != nil {

@@ -15,6 +15,8 @@ type User struct {
 	ImageId   any       `db:"image_id"` //profile image id
 	CreatedAt time.Time `db:"created_at"`
 	Role      string    `db:"role"`
+	LastName  string    `db:"last_name"`
+	FirstName string    `db:"first_name"`
 }
 
 type Otp struct {
@@ -31,13 +33,14 @@ type OtpWithUser struct {
 }
 
 type Tweets struct {
-	Id        string     `db:"id" json:"id"`
-	Content   string     `db:"content" json:"content"`
-	Author    string     ` json:"author"`
-	ImageId   *string    `db:"imageid" json:"imageId"`
-	CreatedAt *time.Time `db:"created_at" json:"createdAt"`
-	UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
-	UserId    string     `db:"userid" json:"userId"`
+	Id             string     `db:"id" json:"id"`
+	Content        string     `db:"content" json:"content"`
+	AuthorUsername string     `db:"author_username" json:"author_username"`
+	Author         string     ` json:"author"`
+	ImageId        *string    `db:"imageid" json:"imageId"`
+	CreatedAt      *time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt      *time.Time `db:"updated_at" json:"updatedAt"`
+	UserId         string     `db:"userid" json:"userId"`
 }
 
 type AuthorImage struct {
@@ -54,6 +57,8 @@ type UserData struct {
 	ImageId   any       `json:"imageId"` //profile image id
 	CreatedAt time.Time `json:"createdAt"`
 	Role      string    `json:"role"`
+	LastName  string    `json:"lastName"`
+	FirstName string    `json:"firstName"`
 }
 
 type ProfileImage struct {

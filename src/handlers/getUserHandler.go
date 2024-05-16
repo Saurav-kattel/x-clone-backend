@@ -38,6 +38,8 @@ func GetUserHandler(db *sqlx.DB) http.HandlerFunc {
 				Role:      userData.Role,
 				ImageId:   userData.ImageId,
 				CreatedAt: userData.CreatedAt,
+				LastName:  userData.LastName,
+				FirstName: userData.FirstName,
 			},
 		})
 	}

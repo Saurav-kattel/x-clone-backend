@@ -11,7 +11,8 @@ func GetTweets(db *sqlx.DB, pageNumber, pageSize int) ([]models.Tweets, error) {
 
 	query := `
         SELECT t.id, t.content, t.imageid, t.created_at, t.updated_at,
-        u.id as userid, u.username as author
+        u.id as userid, u.username as author_username,
+        CONCAT(u.first_name,' ',u.last_name) as author
         FROM tweets t
         JOIN users u ON t.userid = u.id
         ORDER BY t.created_at DESC
