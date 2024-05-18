@@ -18,8 +18,8 @@ func GetUserByUsername(db *sqlx.DB, username string) (*models.User, error) {
 		&user.Role,
 		&user.ImageId,
 		&user.CreatedAt,
-		&user.LastName,
 		&user.FirstName,
+		&user.LastName,
 	)
 
 	if err != nil {

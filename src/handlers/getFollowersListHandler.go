@@ -22,6 +22,7 @@ func GetFollowerList(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
+
 		userData, ok := r.Context().Value(middleware.UserContextKey).(*models.User)
 		if !ok {
 			encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{

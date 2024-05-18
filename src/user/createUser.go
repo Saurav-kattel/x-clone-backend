@@ -25,14 +25,15 @@ func CreateUser(db *sqlx.DB, payload *models.RegisterPayload) (*string, error) {
 		LastName:  payload.LastName,
 	}
 
-	query := `INSERT INTO users (username,email,password,first_name,last_name) VALUES (:username,:email,:password,:first_name,:last_name) RETURNING id`
+	query := `INSERT INTO users (username,email,password,first_name,last_name) VALUES ($1,$2,$3,$4,$5) RETURNING id`
 
-	rows, err := db.NamedQuery(query, userData)
-	scanErr := rows.Scan(&id)
-
-	if scanErr != nil {
-		return nil, scanErr
-	}
+	err := db.QueryRowx(query,
+		&userData.Username,
+		&userData.Email,
+		&userData.Password,
+		&userData.FirstName,
+		&userData.LastName,
+	).Scan(&id)
 
 	if err != nil {
 		return nil, err
