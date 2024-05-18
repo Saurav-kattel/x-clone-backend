@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -21,9 +22,10 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
+		username := r.URL.Query().Get("u_name")
 		pageNumberStr := r.URL.Query().Get("n")
 		pageSizeStr := r.URL.Query().Get("s")
-
+		log.Print(username)
 		pageNumber, err := strconv.Atoi(pageNumberStr)
 		if err != nil {
 			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
@@ -46,20 +48,40 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		tweets, err := tweets.GetTweets(db, pageNumber, pageSize)
-		if err != nil {
-			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-				Status: http.StatusInternalServerError,
-				Res: models.Message{
-					Message: err.Error(),
-				},
+		if username != "" && username != "undefined" {
+			tweets, err := tweets.GetUserPost(db, pageSize, pageNumber, username)
+			if err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res: models.Message{
+						Message: err.Error(),
+					},
+				})
+				return
+			}
+
+			encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
+				Status: http.StatusOK,
+				Res:    tweets,
 			})
 			return
-		}
+		} else {
 
-		encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
-			Status: http.StatusOK,
-			Res:    tweets,
-		})
+			tweets, err := tweets.GetTweets(db, pageNumber, pageSize)
+			if err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res: models.Message{
+						Message: err.Error(),
+					},
+				})
+				return
+			}
+
+			encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
+				Status: http.StatusOK,
+				Res:    tweets,
+			})
+		}
 	}
 }
