@@ -32,22 +32,46 @@ func GetFollowerList(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		data, err := user.GetFollowerList(db, userData.Id)
+		userId := r.URL.Query().Get("u_id")
 
-		if err != nil {
-			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-				Status: http.StatusInternalServerError,
-				Res:    models.Message{Message: err.Error()},
+		if userId != "" && userId != "undefined" {
+
+			data, err := user.GetFollowerList(db, userId)
+
+			if err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res:    models.Message{Message: err.Error()},
+				})
+				return
+
+			}
+
+			//sending status ok
+			encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
+				Status: http.StatusOK,
+				Res:    data,
 			})
-			return
+
+		} else {
+
+			data, err := user.GetFollowerList(db, userData.Id)
+
+			if err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res:    models.Message{Message: err.Error()},
+				})
+				return
+
+			}
+
+			//sending status ok
+			encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
+				Status: http.StatusOK,
+				Res:    data,
+			})
 
 		}
-
-		//sending status ok
-		encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
-			Status: http.StatusOK,
-			Res:    data,
-		})
-
 	}
 }

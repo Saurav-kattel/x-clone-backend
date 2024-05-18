@@ -22,31 +22,52 @@ func GetFollowingList(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
-		userData, ok := r.Context().Value(middleware.UserContextKey).(*models.User)
-		if !ok {
-			encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{
-				Status: http.StatusUnauthorized,
-				Res:    models.Message{Message: "User information not found"},
+
+		userId := r.URL.Query().Get("u_id")
+
+		if userId != "" && userId != "undefined" {
+			data, err := user.GetFollowingList(db, userId) // wasted 2 hours just because i called the wrong function
+
+			if err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res:    models.Message{Message: err.Error()},
+				})
+				return
+
+			}
+
+			//sending status ok
+			encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
+				Status: http.StatusOK,
+				Res:    data,
 			})
 			return
-		}
+		} else {
+			userData, ok := r.Context().Value(middleware.UserContextKey).(*models.User)
+			if !ok {
+				encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{
+					Status: http.StatusUnauthorized,
+					Res:    models.Message{Message: "User information not found"},
+				})
+				return
+			}
+			data, err := user.GetFollowingList(db, userData.Id)
 
-		data, err := user.GetFollowingList(db, userData.Id)
+			if err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res:    models.Message{Message: err.Error()},
+				})
+				return
 
-		if err != nil {
-			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-				Status: http.StatusInternalServerError,
-				Res:    models.Message{Message: err.Error()},
+			}
+
+			//sending status ok
+			encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
+				Status: http.StatusOK,
+				Res:    data,
 			})
-			return
-
 		}
-
-		//sending status ok
-		encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
-			Status: http.StatusOK,
-			Res:    data,
-		})
-
 	}
 }

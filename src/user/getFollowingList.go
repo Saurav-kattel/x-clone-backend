@@ -5,6 +5,7 @@ import (
 	"x-clone.com/backend/src/models"
 )
 
+// retrives who the user is following
 func GetFollowingList(db *sqlx.DB, userId string) (*[]models.FollowerList, error) {
 	var data []models.FollowerList
 
@@ -13,4 +14,4 @@ func GetFollowingList(db *sqlx.DB, userId string) (*[]models.FollowerList, error
 		return nil, err
 	}
 	return &data, nil
-} 
+}
