@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/models"
@@ -25,6 +26,30 @@ func GetCommentsHandler(db *sqlx.DB) http.HandlerFunc {
 
 		tweetId := r.URL.Query().Get("t_id")
 
+		pageNumberStr := r.URL.Query().Get("n")
+		pageSizeStr := r.URL.Query().Get("s")
+
+		pageNumber, err := strconv.Atoi(pageNumberStr)
+		if err != nil {
+			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
+				Status: http.StatusBadRequest,
+				Res: models.Message{
+					Message: err.Error(),
+				},
+			})
+			return
+		}
+
+		pageSize, err := strconv.Atoi(pageSizeStr)
+		if err != nil {
+			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
+				Status: http.StatusBadRequest,
+				Res: models.Message{
+					Message: err.Error(),
+				},
+			})
+			return
+		}
 		if tweetId == "" || tweetId == "undefined" {
 			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
 				Status: http.StatusBadRequest,
@@ -34,7 +59,7 @@ func GetCommentsHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
-		comments, err := tweets.GetComments(db, tweetId)
+		comments, err := tweets.GetComments(db, tweetId, pageNumber, pageSize)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				encoder.ResponseWriter(w, http.StatusNotFound, models.ErrorResponse{

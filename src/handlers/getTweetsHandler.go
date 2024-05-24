@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
@@ -25,8 +24,9 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 		username := r.URL.Query().Get("u_name")
 		pageNumberStr := r.URL.Query().Get("n")
 		pageSizeStr := r.URL.Query().Get("s")
-		log.Print(username)
 		pageNumber, err := strconv.Atoi(pageNumberStr)
+		tweetId := r.URL.Query().Get("t_id")
+
 		if err != nil {
 			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
 				Status: http.StatusBadRequest,
@@ -65,6 +65,22 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 				Res:    tweets,
 			})
 			return
+		} else if tweetId != "" && tweetId != "undefined" {
+			tweets, err := tweets.GetTweetsById(db, tweetId)
+			if err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res: models.Message{
+						Message: err.Error(),
+					},
+				})
+				return
+			}
+
+			encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
+				Status: http.StatusOK,
+				Res:    tweets,
+			})
 		} else {
 
 			tweets, err := tweets.GetTweets(db, pageNumber, pageSize)
