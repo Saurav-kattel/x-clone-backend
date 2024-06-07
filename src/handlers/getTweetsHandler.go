@@ -24,9 +24,9 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 		username := r.URL.Query().Get("u_name")
 		pageNumberStr := r.URL.Query().Get("n")
 		pageSizeStr := r.URL.Query().Get("s")
-		pageNumber, err := strconv.Atoi(pageNumberStr)
 		tweetId := r.URL.Query().Get("t_id")
 
+		pageNumber, err := strconv.Atoi(pageNumberStr)
 		if err != nil {
 			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
 				Status: http.StatusBadRequest,

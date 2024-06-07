@@ -10,7 +10,6 @@ import (
 func ConnectDB(cnStr string) (*sqlx.DB, error) {
 	// Define connection parameters
 	connectionString := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", "postgres", "saurav", "x-clone")
-
 	// Open a connection to the database
 	db, err := sqlx.Connect("postgres", connectionString)
 	if err != nil {

@@ -104,3 +104,7 @@ type ReplyData struct {
 	CommentId           string  `json:"comment_id" db:"comment_id"`
 	Parent_id           *string `json:"parent_id" db:"parent_id"`
 }
+
+type UserRepliedTweet struct {
+	Tweets
+}
