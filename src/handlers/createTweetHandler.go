@@ -35,7 +35,7 @@ func CreateTweetHandler(db *sqlx.DB) http.HandlerFunc {
 		}
 		// parsing req.FormValue
 		data, err := decoder.TweetPayloadDecoder(r)
-		if err != nil {
+		if err != nil && err.Error() != "EOF" {
 			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
 				Status: http.StatusBadRequest,
 				Res: models.Message{
@@ -58,26 +58,46 @@ func CreateTweetHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		if r.MultipartForm == nil {
-			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
-				Status: http.StatusBadRequest,
-				Res: models.Message{
-					Message: "multipart is nil",
-				},
-			})
-			return
-		}
-
-		//reading mulipart data from request object
-		file, _, formFileErr := r.FormFile("file")
-		if formFileErr != nil {
-			tweets.HandleTweetsWithoutImage(w, db, data, userData.Id)
-		} else {
-			tweets.HandleTweetWithImage(w, db, file, data, userData.Id)
+		if len(r.MultipartForm.File) > 0 {
+			//reading mulipart data from request object
+			file, _, formFileErr := r.FormFile("file")
 			defer file.Close()
 
-		}
+			if formFileErr != nil {
+				encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
+					Status: http.StatusBadRequest,
+					Res: models.Message{
+						Message: formFileErr.Error(),
+					},
+				})
+				return
+			}
+			err := tweets.HandleTweetWithImage(w, db, file, data, userData.Id)
+			if err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res: models.Message{
+						Message: err.Error(),
+					},
+				})
+				return
 
+			}
+
+		} else {
+
+			err := tweets.HandleTweetsWithoutImage(w, db, data, userData.Id)
+			if err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res: models.Message{
+						Message: err.Error(),
+					},
+				})
+				return
+
+			}
+		}
 		encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
 			Status: http.StatusOK,
 			Res:    "tweets created successfully",
