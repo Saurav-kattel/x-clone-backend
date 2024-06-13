@@ -6,5 +6,6 @@ CREATE TABLE IF NOT EXISTS users(
     username VARCHAR(100) NOT NULL,
     role VARCHAR(20) DEFAULT 'user',
     image_id UUID,
+    UNIQUE(username),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/models"
@@ -100,6 +101,7 @@ func LoginUserHandler(db *sqlx.DB) http.HandlerFunc {
 			Name:     "auth_token_x_clone",
 			Path:     "/",
 			HttpOnly: true,
+			Expires:  time.Now().Add(time.Hour * 10),
 			Value:    token,
 		}
 		http.SetCookie(w, cookie)

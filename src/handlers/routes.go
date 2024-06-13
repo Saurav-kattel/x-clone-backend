@@ -27,6 +27,9 @@ func Routers(db *sqlx.DB) *http.ServeMux {
 	router.Handle("/api/v1/user/tweet/reply", unAuthStack(UserRepliesHandler(db)))
 	router.Handle("/api/v1/user/tweet/liked", unAuthStack(UserLikedTweets(db)))
 
+	router.Handle("/api/v1/notification/get", authStack(GetNotifications(db)))
+	router.Handle("/api/v1/notification/status/update", unAuthStack(UpdateNotificationHandler(db)))
+
 	router.Handle("/api/v1/tweet/author/image", unAuthStack(GetAuthorImageHandler(db)))
 	router.Handle("/api/v1/tweet/get", unAuthStack(GetTweetsHandler(db)))
 	router.Handle("/api/v1/tweet/image", unAuthStack(GetTweetImageHandler(db)))

@@ -2,11 +2,14 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/middleware"
 	"x-clone.com/backend/src/models"
+	"x-clone.com/backend/src/notification"
 	"x-clone.com/backend/src/tweets"
 	"x-clone.com/backend/src/utils/decoder"
 	"x-clone.com/backend/src/utils/encoder"
@@ -63,6 +66,19 @@ func CommentHandlers(db *sqlx.DB) http.HandlerFunc {
 						})
 						return
 					}
+
+					log.Println(data.RepliedTO)
+					notificationMsg := fmt.Sprintf("@%s  replied to your comment", userData.Username)
+					notification.CreateNofication(db, userData.Id, data.RepliedTO, notificationMsg)
+					if err := notification.CreateNofication(db, userData.Id, data.RepliedTO, notificationMsg); err != nil {
+						encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+							Status: http.StatusInternalServerError,
+							Res: models.Message{
+								Message: err.Error(),
+							},
+						})
+						return
+					}
 				} else {
 					encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 						Status: http.StatusInternalServerError,
@@ -75,6 +91,17 @@ func CommentHandlers(db *sqlx.DB) http.HandlerFunc {
 			} else {
 				err := tweets.CreateReplies(db, data.Comment, userData.Id, data.TweetId, data.ParentCommentId, data.RepliedTO, data.CommentId)
 				if err != nil {
+					encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+						Status: http.StatusInternalServerError,
+						Res: models.Message{
+							Message: err.Error(),
+						},
+					})
+					return
+				}
+
+				notificationMsg := fmt.Sprintf("@%s  replied to your comment", userData.Username)
+				if err := notification.CreateNofication(db, userData.Id, data.RepliedTO, notificationMsg); err != nil {
 					encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 						Status: http.StatusInternalServerError,
 						Res: models.Message{
@@ -97,8 +124,17 @@ func CommentHandlers(db *sqlx.DB) http.HandlerFunc {
 				})
 				return
 			}
+			notificationMsg := fmt.Sprintf("@%s  commented on your post", userData.Username)
+			if err := notification.CreateNofication(db, userData.Id, data.RepliedTO, notificationMsg); err != nil {
+				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+					Status: http.StatusInternalServerError,
+					Res: models.Message{
+						Message: err.Error(),
+					},
+				})
+				return
+			}
 		}
-
 		encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
 			Status: http.StatusOK,
 			Res:    "comments added successfully",

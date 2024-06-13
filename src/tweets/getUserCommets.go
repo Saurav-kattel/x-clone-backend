@@ -10,7 +10,12 @@ func GetUserComment(db *sqlx.DB, userId, tweetId string, pageSize, pageNumber in
 	var data []models.CommentData
 
 	offset := (pageNumber - 1) * pageSize
-	err := db.Select(&data, "SELECT comments.*,users.username as username FROM comments JOIN users ON comments.user_id = users.id WHERE user_id = $1 AND tweet_id = $2 ORDER by created_at DESC LIMIT $3 OFFSET $4", userId, tweetId, pageSize, offset)
+	err := db.Select(&data, `
+	SELECT DISTINCT comments.*,users.username as username FROM comments
+	JOIN users ON comments.user_id = users.id
+	LEFT JOIN reply r ON r.comment_id = comments.id
+	WHERE (comments.user_id = $1 AND comments.tweet_id = $2) OR (r.replied_from = $1 OR r.replied_to = $1)
+	ORDER by created_at DESC LIMIT $3 OFFSET $4`, userId, tweetId, pageSize, offset)
 
 	if err != nil {
 		return nil, err
