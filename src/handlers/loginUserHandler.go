@@ -99,7 +99,7 @@ func LoginUserHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 		}
 		str := fmt.Sprintf("Logged in from %s on %s", data.Email, user.CreatedAt.Local())
-		if err := notification.CreateNotification(db, nil, &user.Id, &str); err != nil {
+		if err := notification.CreateNotification(db, nil, &user.Id, &str, nil, "login"); err != nil {
 			log.Printf("%+v", err)
 		}
 		//setting up cookies

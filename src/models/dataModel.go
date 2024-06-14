@@ -128,5 +128,7 @@ type NotificationData struct {
 	Message            string     `db:"message" json:"message"`
 	Status             string     `db:"status" json:"status"`
 	CreatedAt          time.Time  `db:"created_at" json:"created_at"`
+	Type               *string    `db:"type" json:"type"`
 	UpdatedAt          time.Time  `db:"updated_at" json:"updated_at"`
+	TweetId            *string    `db:"tweet_id" json:"tweet_id"`
 }

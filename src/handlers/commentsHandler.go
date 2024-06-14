@@ -64,7 +64,7 @@ func handleReply(db *sqlx.DB, w http.ResponseWriter, data *models.Comment, user 
 				return
 			}
 			notificationMsg := fmt.Sprintf("replied to your comment")
-			go notification.CreateNotification(db, &user.Id, &data.RepliedTO, &notificationMsg)
+			go notification.CreateNotification(db, &user.Id, &data.RepliedTO, &notificationMsg, &data.TweetId, "reply")
 		} else {
 			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 				Status: http.StatusInternalServerError,
@@ -82,7 +82,7 @@ func handleReply(db *sqlx.DB, w http.ResponseWriter, data *models.Comment, user 
 			return
 		}
 		notificationMsg := fmt.Sprintf("replied to your comment")
-		go notification.CreateNotification(db, &user.Id, &data.RepliedTO, &notificationMsg)
+		go notification.CreateNotification(db, &user.Id, &data.RepliedTO, &notificationMsg, &data.TweetId, "reply")
 	}
 
 	encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
@@ -101,7 +101,7 @@ func handleComment(db *sqlx.DB, w http.ResponseWriter, data *models.Comment, use
 		return
 	}
 	notificationMsg := fmt.Sprintf("commented on your post")
-	go notification.CreateNotification(db, &user.Id, &data.RepliedTO, &notificationMsg)
+	go notification.CreateNotification(db, &user.Id, &data.RepliedTO, &notificationMsg, &data.TweetId, "comment")
 
 	encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
 		Status: http.StatusOK,

@@ -1,12 +1,16 @@
 package notification
 
 import (
+	"log"
+
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/models"
 )
 
-func CreateNotification(db *sqlx.DB, recipientId, reciverId, text *string) error {
-	_, err := db.Exec(`INSERT INTO notifications(recipient_id, reciver_id, message) VALUES ($1, $2, $3)`, recipientId, reciverId, text)
+func CreateNotification(db *sqlx.DB, recipientId, reciverId, text, tweet_id *string, notType string) error {
+
+	_, err := db.Exec(`INSERT INTO notifications(recipient_id, reciver_id, message, tweet_id,type) VALUES ($1, $2, $3,$4, $5)`, recipientId, reciverId, text, tweet_id, notType)
+	log.Print(err)
 	return err
 }
 
@@ -21,6 +25,8 @@ func GetNotificationsByReceiverID(db *sqlx.DB, receiverId string) (*[]models.Not
             notifications.status, 
             notifications.created_at, 
             notifications.updated_at,
+            notifications.type,
+            notifications.tweet_id,
             u1.id as "recipient_id",
             u1.username as "recipient_username",
             u1.email as "recipient_email",
