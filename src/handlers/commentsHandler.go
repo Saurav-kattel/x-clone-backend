@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -17,13 +16,10 @@ import (
 
 func CommentHandlers(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		if r.Method != "POST" {
 			encoder.ResponseWriter(w, http.StatusMethodNotAllowed, models.ErrorResponse{
 				Status: http.StatusMethodNotAllowed,
-				Res: models.Message{
-					Message: "invalid http method",
-				},
+				Res:    models.Message{Message: "invalid http method"},
 			})
 			return
 		}
@@ -37,108 +33,78 @@ func CommentHandlers(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		// parsing req.FormValue
 		data, err := decoder.CommentsPayloadDecoder(r)
 		if err != nil {
 			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
 				Status: http.StatusBadRequest,
-				Res: models.Message{
-					Message: "req payload: " + err.Error(),
-				},
+				Res:    models.Message{Message: "req payload: " + err.Error()},
 			})
 			return
 		}
 
 		if data.ParentCommentId != nil {
-			hasParentReply := tweets.CheckForExistingReply(db, *data.ParentCommentId)
-			// checking if the existing reply for error
-			if hasParentReply != nil {
-				// checking for not found error
-				if hasParentReply == sql.ErrNoRows {
-					//if no rows create a reply with parent comment id nil
-					err := tweets.CreateReplies(db, data.Comment, userData.Id, data.TweetId, nil, data.RepliedTO, data.CommentId)
-					if err != nil {
-						encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-							Status: http.StatusInternalServerError,
-							Res: models.Message{
-								Message: err.Error(),
-							},
-						})
-						return
-					}
-
-					log.Println(data.RepliedTO)
-					notificationMsg := fmt.Sprintf("@%s  replied to your comment", userData.Username)
-					notification.CreateNofication(db, userData.Id, data.RepliedTO, notificationMsg)
-					if err := notification.CreateNofication(db, userData.Id, data.RepliedTO, notificationMsg); err != nil {
-						encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-							Status: http.StatusInternalServerError,
-							Res: models.Message{
-								Message: err.Error(),
-							},
-						})
-						return
-					}
-				} else {
-					encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-						Status: http.StatusInternalServerError,
-						Res: models.Message{
-							Message: hasParentReply.Error(),
-						},
-					})
-					return
-				}
-			} else {
-				err := tweets.CreateReplies(db, data.Comment, userData.Id, data.TweetId, data.ParentCommentId, data.RepliedTO, data.CommentId)
-				if err != nil {
-					encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-						Status: http.StatusInternalServerError,
-						Res: models.Message{
-							Message: err.Error(),
-						},
-					})
-					return
-				}
-
-				notificationMsg := fmt.Sprintf("@%s  replied to your comment", userData.Username)
-				if err := notification.CreateNofication(db, userData.Id, data.RepliedTO, notificationMsg); err != nil {
-					encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-						Status: http.StatusInternalServerError,
-						Res: models.Message{
-							Message: err.Error(),
-						},
-					})
-					return
-				}
-			}
+			handleReply(db, w, data, userData)
+		} else {
+			handleComment(db, w, data, userData)
 		}
+	}
+}
 
-		if data.ParentCommentId == nil {
-			err := tweets.CreateComment(db, data.Comment, userData.Id, data.TweetId)
+func handleReply(db *sqlx.DB, w http.ResponseWriter, data *models.Comment, user *models.User) {
+	hasParentReply := tweets.CheckForExistingReply(db, *data.ParentCommentId)
+
+	if hasParentReply != nil {
+		if hasParentReply == sql.ErrNoRows {
+			err := tweets.CreateReplies(db, data.Comment, user.Id, data.TweetId, nil, data.RepliedTO, data.CommentId)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
-					Res: models.Message{
-						Message: err.Error(),
-					},
+					Res:    models.Message{Message: err.Error()},
 				})
 				return
 			}
-			notificationMsg := fmt.Sprintf("@%s  commented on your post", userData.Username)
-			if err := notification.CreateNofication(db, userData.Id, data.RepliedTO, notificationMsg); err != nil {
-				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-					Status: http.StatusInternalServerError,
-					Res: models.Message{
-						Message: err.Error(),
-					},
-				})
-				return
-			}
+			notificationMsg := fmt.Sprintf("replied to your comment")
+			go notification.CreateNotification(db, &user.Id, &data.RepliedTO, &notificationMsg)
+		} else {
+			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+				Status: http.StatusInternalServerError,
+				Res:    models.Message{Message: hasParentReply.Error()},
+			})
+			return
 		}
-		encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
-			Status: http.StatusOK,
-			Res:    "comments added successfully",
-		})
-
+	} else {
+		err := tweets.CreateReplies(db, data.Comment, user.Id, data.TweetId, data.ParentCommentId, data.RepliedTO, data.CommentId)
+		if err != nil {
+			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+				Status: http.StatusInternalServerError,
+				Res:    models.Message{Message: err.Error()},
+			})
+			return
+		}
+		notificationMsg := fmt.Sprintf("replied to your comment")
+		go notification.CreateNotification(db, &user.Id, &data.RepliedTO, &notificationMsg)
 	}
+
+	encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
+		Status: http.StatusOK,
+		Res:    "reply added successfully",
+	})
+}
+
+func handleComment(db *sqlx.DB, w http.ResponseWriter, data *models.Comment, user *models.User) {
+	err := tweets.CreateComment(db, data.Comment, user.Id, data.TweetId)
+	if err != nil {
+		encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+			Status: http.StatusInternalServerError,
+			Res:    models.Message{Message: err.Error()},
+		})
+		return
+	}
+	notificationMsg := fmt.Sprintf("commented on your post")
+	go notification.CreateNotification(db, &user.Id, &data.RepliedTO, &notificationMsg)
+
+	encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
+		Status: http.StatusOK,
+		Res:    "comment added successfully",
+	})
 }

@@ -2,11 +2,14 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/models"
+	"x-clone.com/backend/src/notification"
 	"x-clone.com/backend/src/user"
 	"x-clone.com/backend/src/utils/decoder"
 	"x-clone.com/backend/src/utils/encoder"
@@ -95,7 +98,10 @@ func LoginUserHandler(db *sqlx.DB) http.HandlerFunc {
 				},
 			})
 		}
-
+		str := fmt.Sprintf("Logged in from %s on %s", data.Email, user.CreatedAt.Local())
+		if err := notification.CreateNotification(db, nil, &user.Id, &str); err != nil {
+			log.Printf("%+v", err)
+		}
 		//setting up cookies
 		cookie := &http.Cookie{
 			Name:     "auth_token_x_clone",

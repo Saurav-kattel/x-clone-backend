@@ -33,7 +33,7 @@ func UpdateNotificationHandler(db *sqlx.DB) http.HandlerFunc {
 
 		}
 
-		err := notification.UpadateCommentStatus(db, notId)
+		err := notification.UpdateCommentStatus(db, notId)
 
 		if err != nil {
 			encoder.ResponseWriter(w, http.StatusMethodNotAllowed, models.ErrorResponse{

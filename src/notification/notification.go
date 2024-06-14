@@ -1,21 +1,16 @@
 package notification
 
 import (
-	"log"
-
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/models"
 )
 
-func CreateNofication(db *sqlx.DB, recipientId, reciverId, text string) error {
-	log.Printf("called %s", text)
-	_, err := db.Exec(`INSERT INTO notifications(recipient_id, reciver_id,message) VALUES ($1,$2,$3)`, recipientId, reciverId, text)
-	log.Printf("err: %s", err)
+func CreateNotification(db *sqlx.DB, recipientId, reciverId, text *string) error {
+	_, err := db.Exec(`INSERT INTO notifications(recipient_id, reciver_id, message) VALUES ($1, $2, $3)`, recipientId, reciverId, text)
 	return err
 }
 
 func GetNotificationsByReceiverID(db *sqlx.DB, receiverId string) (*[]models.NotificationData, error) {
-	log.Printf(receiverId)
 	var data []models.NotificationData
 	query := `
         SELECT 
@@ -42,15 +37,18 @@ func GetNotificationsByReceiverID(db *sqlx.DB, receiverId string) (*[]models.Not
             u2.first_name as "reciver_first_name"
         FROM 
             notifications 
-        JOIN 
+        LEFT JOIN 
             users u1
         ON 
             notifications.recipient_id = u1.id
-	JOIN
-	 users u2
-	ON notifications.reciver_id = u2.id
+        JOIN
+            users u2
+        ON 
+            notifications.reciver_id = u2.id
         WHERE 
-            notifications.reciver_id = $1`
+            notifications.reciver_id = $1
+        ORDER BY notifications.created_at DESC
+	`
 	err := db.Select(&data, query, receiverId)
 	if err != nil {
 		return nil, err
@@ -58,7 +56,7 @@ func GetNotificationsByReceiverID(db *sqlx.DB, receiverId string) (*[]models.Not
 	return &data, nil
 }
 
-func UpadateCommentStatus(db *sqlx.DB, notificatinId string) error {
-	_, err := db.Exec("UPDATE notifications SET status  = 'read' WHERE id = $1", notificatinId)
+func UpdateCommentStatus(db *sqlx.DB, notificationId string) error {
+	_, err := db.Exec("UPDATE notifications SET status = 'read' WHERE id = $1", notificationId)
 	return err
 }

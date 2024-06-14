@@ -110,23 +110,23 @@ type UserRepliedTweet struct {
 }
 
 type NotificationData struct {
-	ID                 string    `db:"id" json:"id"`
-	RecipientID        string    `db:"recipient_id" json:"recipient_id"`
-	RecipientUsername  string    `db:"recipient_username" json:"recipient_username"`
-	RecipientEmail     string    `db:"recipient_email" json:"recipient_email"`
-	RecipientImageID   string    `db:"recipient_image_id" json:"recipient_image_id"`
-	RecipientCreatedAt time.Time `db:"recipient_created_at" json:"recipient_created_at"`
-	RecipientLastName  string    `db:"recipient_last_name" json:"recipient_last_name"`
-	RecipientFirstName string    `db:"recipient_first_name" json:"recipient_first_name"`
-	ReciverID          string    `db:"reciver_id" json:"reciver_id"`
-	ReciverUsername    string    `db:"reciver_username" json:"reciver_username"`
-	ReciverEmail       string    `db:"reciver_email" json:"reciver_email"`
-	ReciverImageID     string    `db:"reciver_image_id" json:"reciver_image_id"`
-	ReciverCreatedAt   time.Time `db:"reciver_created_at" json:"reciver_created_at"`
-	ReciverLastName    string    `db:"reciver_last_name" json:"reciver_last_name"`
-	ReciverFirstName   string    `db:"reciver_first_name" json:"reciver_first_name"`
-	Message            string    `db:"message" json:"message"`
-	Status             string    `db:"status" json:"status"`
-	CreatedAt          time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt          time.Time `db:"updated_at" json:"updated_at"`
+	ID                 *string    `db:"id" json:"id"`
+	RecipientID        *string    `db:"recipient_id" json:"recipient_id"`
+	RecipientUsername  *string    `db:"recipient_username" json:"recipient_username"`
+	RecipientEmail     *string    `db:"recipient_email" json:"recipient_email"`
+	RecipientImageID   *string    `db:"recipient_image_id" json:"recipient_image_id"`
+	RecipientCreatedAt *time.Time `db:"recipient_created_at" json:"recipient_created_at"`
+	RecipientLastName  *string    `db:"recipient_last_name" json:"recipient_last_name"`
+	RecipientFirstName *string    `db:"recipient_first_name" json:"recipient_first_name"`
+	ReciverID          *string    `db:"reciver_id" json:"reciver_id"`
+	ReciverUsername    *string    `db:"reciver_username" json:"reciver_username"`
+	ReciverEmail       *string    `db:"reciver_email" json:"reciver_email"`
+	ReciverImageID     *string    `db:"reciver_image_id" json:"reciver_image_id"`
+	ReciverCreatedAt   time.Time  `db:"reciver_created_at" json:"reciver_created_at"`
+	ReciverLastName    *string    `db:"reciver_last_name" json:"reciver_last_name"`
+	ReciverFirstName   *string    `db:"reciver_first_name" json:"reciver_first_name"`
+	Message            string     `db:"message" json:"message"`
+	Status             string     `db:"status" json:"status"`
+	CreatedAt          time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt          time.Time  `db:"updated_at" json:"updated_at"`
 }
