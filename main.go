@@ -5,19 +5,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"x-clone.com/backend/src/database"
 	"x-clone.com/backend/src/handlers"
 )
 
 func main() {
-	//loading environment variables
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
-	}
-
-	//port := os.Getenv("PORT")
 
 	connectionString := os.Getenv("CONN_STR")
 	//connecting to database
