@@ -41,6 +41,7 @@ type Tweets struct {
 	CreatedAt      *time.Time `db:"created_at" json:"createdAt"`
 	UpdatedAt      *time.Time `db:"updated_at" json:"updatedAt"`
 	UserId         string     `db:"userid" json:"userId"`
+	Visibility     *string    `db:"visibility" json:"visibility"`
 }
 
 type AuthorImage struct {

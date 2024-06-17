@@ -42,7 +42,10 @@ type TweetsPayload struct {
 	Content    string `json:"content"`
 	Visibility string `json:"visibility"`
 }
-
+type TweetVisPayload struct {
+	TweetId    string `json:"tweetId"`
+	Visibility string `json:"visibility"`
+}
 type DeleteTweetPayload struct {
 	TweetId string `json:"tweetId"`
 }

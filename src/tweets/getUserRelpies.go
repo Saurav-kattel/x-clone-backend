@@ -10,7 +10,7 @@ func GetUserRepliedTweets(db *sqlx.DB, pageNumber, pageSize int, userId string) 
 	offset := (pageNumber - 1) * pageSize
 
 	query := `
-        SELECT DISTINCT t.id, t.content, t.imageid, t.created_at, t.updated_at,
+        SELECT DISTINCT t.id, t.content, t.visibility, t.imageid, t.created_at, t.updated_at,
         u.id as userid, u.username as author_username,
         CONCAT(u.first_name,' ',u.last_name) as author
         FROM tweets t
