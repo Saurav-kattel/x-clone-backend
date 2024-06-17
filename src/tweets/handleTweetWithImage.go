@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"image"
 	"io"
-	"net/http"
 
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/models"
 	"x-clone.com/backend/src/utils/encoder"
 )
 
-func HandleTweetWithImage(w http.ResponseWriter, db *sqlx.DB, file io.Reader, data *models.TweetsPayload, userId string) error {
+func HandleTweetWithImage(db *sqlx.DB, file io.Reader, data *models.TweetsPayload, userId string) error {
 	orginalImage, _, err := image.Decode(file)
 	if err != nil {
 		return fmt.Errorf("image decoding error : %+v", err.Error())

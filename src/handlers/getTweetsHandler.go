@@ -49,7 +49,7 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		if username != "" && username != "undefined" {
-			tweets, err := tweets.GetUserPost(db, pageSize, pageNumber, username)
+			tweets, err := tweets.GetUserPost(db, pageSize, pageNumber, username, "public")
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
@@ -66,7 +66,7 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		} else if tweetId != "" && tweetId != "undefined" {
-			tweets, err := tweets.GetTweetsById(db, tweetId)
+			tweets, err := tweets.GetTweetsById(db, tweetId, "public")
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
@@ -83,7 +83,7 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 		} else {
 
-			tweets, err := tweets.GetTweets(db, pageNumber, pageSize)
+			tweets, err := tweets.GetTweets(db, pageNumber, pageSize, "public")
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,

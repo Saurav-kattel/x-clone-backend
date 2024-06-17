@@ -7,7 +7,7 @@ import (
 	"x-clone.com/backend/src/models"
 )
 
-func GetUserPost(db *sqlx.DB, pageSize, pageNumber int, username string) (*[]models.Tweets, error) {
+func GetUserPost(db *sqlx.DB, pageSize, pageNumber int, username, vis string) (*[]models.Tweets, error) {
 	tweets := []models.Tweets{}
 	offset := (pageNumber - 1) * pageSize
 	query := `
@@ -27,7 +27,10 @@ JOIN
 ON 
     t.userid = u.id
 WHERE 
-    u.username = $1
+    u.username = $1 
+AND
+WHERE 
+  t.visibility = $4
 ORDER BY 
     t.created_at DESC
 LIMIT 
@@ -35,7 +38,7 @@ LIMIT
 OFFSET $3;
     `
 
-	err := db.Select(&tweets, query, username, pageSize, offset)
+	err := db.Select(&tweets, query, username, pageSize, offset, vis)
 	if err != nil {
 		log.Printf("Error executing query: %v\n", err)
 		return nil, err

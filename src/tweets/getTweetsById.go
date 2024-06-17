@@ -5,7 +5,7 @@ import (
 	"x-clone.com/backend/src/models"
 )
 
-func GetTweetsById(db *sqlx.DB, tweetId string) (*models.Tweets, error) {
+func GetTweetsById(db *sqlx.DB, tweetId, vis string) (*models.Tweets, error) {
 	tweets := models.Tweets{}
 
 	query := `
@@ -14,11 +14,11 @@ func GetTweetsById(db *sqlx.DB, tweetId string) (*models.Tweets, error) {
         CONCAT(u.first_name,' ',u.last_name) as author
         FROM tweets t
         JOIN users u ON t.userid = u.id
-        WHERE t.id = $1
+        WHERE t.id = $1 AND WHERE t.visibility = $2
         ORDER BY t.created_at DESC
     `
 
-	err := db.QueryRowx(query, tweetId).StructScan(&tweets)
+	err := db.QueryRowx(query, tweetId, vis).StructScan(&tweets)
 	if err != nil {
 		return nil, err
 	}

@@ -9,6 +9,7 @@ import (
 	"x-clone.com/backend/src/tweets"
 	"x-clone.com/backend/src/utils/decoder"
 	"x-clone.com/backend/src/utils/encoder"
+	"x-clone.com/backend/src/utils/validator"
 )
 
 //need to create a seperate handler to insert tweet image
@@ -45,6 +46,15 @@ func CreateTweetHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
+		if err := validator.ValidateVisibility(data); err != nil {
+			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
+				Status: http.StatusBadRequest,
+				Res: models.Message{
+					Message: err.Error(),
+				},
+			})
+			return
+		}
 		//parsing multipart data and setting up 10MB limit
 		multipartErr := r.ParseMultipartForm(10 << 20)
 		// Check if the request contains multipart data
@@ -72,7 +82,7 @@ func CreateTweetHandler(db *sqlx.DB) http.HandlerFunc {
 				})
 				return
 			}
-			err := tweets.HandleTweetWithImage(w, db, file, data, userData.Id)
+			err := tweets.HandleTweetWithImage(db, file, data, userData.Id)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
@@ -86,7 +96,7 @@ func CreateTweetHandler(db *sqlx.DB) http.HandlerFunc {
 
 		} else {
 
-			err := tweets.HandleTweetsWithoutImage(w, db, data, userData.Id)
+			err := tweets.HandleTweetsWithoutImage(db, data, userData.Id)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
