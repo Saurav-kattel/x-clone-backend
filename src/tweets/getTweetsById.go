@@ -14,7 +14,7 @@ func GetTweetsById(db *sqlx.DB, tweetId, vis string) (*models.Tweets, error) {
         CONCAT(u.first_name,' ',u.last_name) as author
         FROM tweets t
         JOIN users u ON t.userid = u.id
-        WHERE t.id = $1 AND WHERE t.visibility = $2
+        WHERE t.id = $1 AND  t.visibility = $2
         ORDER BY t.created_at DESC
     `
 
