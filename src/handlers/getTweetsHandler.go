@@ -25,6 +25,17 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 		pageNumberStr := r.URL.Query().Get("n")
 		pageSizeStr := r.URL.Query().Get("s")
 		tweetId := r.URL.Query().Get("t_id")
+		vis := r.URL.Query().Get("vis")
+
+		if vis != "public" && vis != "private" && vis != "followers" {
+			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
+				Status: http.StatusBadRequest,
+				Res: models.Message{
+					Message: "bad visibility information",
+				},
+			})
+			return
+		}
 
 		pageNumber, err := strconv.Atoi(pageNumberStr)
 		if err != nil {
@@ -49,7 +60,7 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		if username != "" && username != "undefined" {
-			tweets, err := tweets.GetUserPost(db, pageSize, pageNumber, username, "public")
+			tweets, err := tweets.GetUserPost(db, pageSize, pageNumber, username, vis)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
@@ -66,7 +77,7 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		} else if tweetId != "" && tweetId != "undefined" {
-			tweets, err := tweets.GetTweetsById(db, tweetId, "public")
+			tweets, err := tweets.GetTweetsById(db, tweetId, vis)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
@@ -83,7 +94,7 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 		} else {
 
-			tweets, err := tweets.GetTweets(db, pageNumber, pageSize, "public")
+			tweets, err := tweets.GetTweets(db, pageNumber, pageSize, vis)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
