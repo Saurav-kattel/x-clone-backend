@@ -29,7 +29,6 @@ ON
 WHERE 
     u.username = $1 
 AND
-WHERE 
   t.visibility = $4
 ORDER BY 
     t.created_at DESC
