@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
-	"x-clone.com/backend/src/middleware"
 	"x-clone.com/backend/src/models"
 	"x-clone.com/backend/src/user"
 	"x-clone.com/backend/src/utils/encoder"
@@ -23,51 +22,31 @@ func GetFollowingList(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		userId := r.URL.Query().Get("u_id")
+		userName := r.URL.Query().Get("u_name")
 
-		if userId != "" && userId != "undefined" {
-			data, err := user.GetFollowingList(db, userId) // wasted 2 hours just because i called the wrong function
+		if userName == "" || userName == "undefined" {
+			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
+				Status: http.StatusBadRequest,
+				Res:    models.Message{Message: "username not found"},
+			})
 
-			if err != nil {
-				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-					Status: http.StatusInternalServerError,
-					Res:    models.Message{Message: err.Error()},
-				})
-				return
+			return
+		}
+		data, err := user.GetFollowingList(db, userName)
 
-			}
-
-			//sending status ok
-			encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
-				Status: http.StatusOK,
-				Res:    data,
+		if err != nil {
+			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
+				Status: http.StatusInternalServerError,
+				Res:    models.Message{Message: err.Error()},
 			})
 			return
-		} else {
-			userData, ok := r.Context().Value(middleware.UserContextKey).(*models.User)
-			if !ok {
-				encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{
-					Status: http.StatusUnauthorized,
-					Res:    models.Message{Message: "User information not found"},
-				})
-				return
-			}
-			data, err := user.GetFollowingList(db, userData.Id)
 
-			if err != nil {
-				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-					Status: http.StatusInternalServerError,
-					Res:    models.Message{Message: err.Error()},
-				})
-				return
-
-			}
-
-			//sending status ok
-			encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
-				Status: http.StatusOK,
-				Res:    data,
-			})
 		}
+
+		//sending status ok
+		encoder.ResponseWriter(w, http.StatusOK, models.SuccessResponse{
+			Status: http.StatusOK,
+			Res:    data,
+		})
 	}
 }

@@ -46,7 +46,6 @@ func FollowUserHandler(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		followingErr := user.IsFollowing(db, userData.Id, followeeId)
-
 		if followingErr != nil && followingErr != sql.ErrNoRows {
 			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 				Status: http.StatusInternalServerError,
