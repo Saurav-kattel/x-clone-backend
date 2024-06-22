@@ -17,8 +17,10 @@ func GetUserPost(db *sqlx.DB, pageSize, pageNumber int, username, vis string) (*
     t.imageid, 
     t.created_at, 
     t.updated_at,
+    t.visibility,
     u.id AS userid, 
     u.username AS author_username,
+
     CONCAT(u.first_name, ' ', u.last_name) AS author
 FROM 
     tweets t
