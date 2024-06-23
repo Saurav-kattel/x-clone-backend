@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/jmoiron/sqlx"
+	"x-clone.com/backend/src/middleware"
 	"x-clone.com/backend/src/models"
 	"x-clone.com/backend/src/tweets"
 	"x-clone.com/backend/src/utils/encoder"
@@ -21,6 +22,15 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 			return
 		}
+		userData, ok := r.Context().Value(middleware.UserContextKey).(*models.User)
+		if !ok {
+			encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{
+				Status: http.StatusUnauthorized,
+				Res:    models.Message{Message: "User information not found"},
+			})
+			return
+		}
+
 		username := r.URL.Query().Get("u_name")
 		pageNumberStr := r.URL.Query().Get("n")
 		pageSizeStr := r.URL.Query().Get("s")
@@ -94,7 +104,7 @@ func GetTweetsHandler(db *sqlx.DB) http.HandlerFunc {
 			})
 		} else {
 
-			tweets, err := tweets.GetTweets(db, pageNumber, pageSize, vis)
+			tweets, err := tweets.GetTweets(db, pageNumber, pageSize, vis, userData.Id)
 			if err != nil {
 				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 					Status: http.StatusInternalServerError,
