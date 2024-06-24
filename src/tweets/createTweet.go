@@ -10,7 +10,7 @@ import (
 func CreateTweets(db *sqlx.DB, payload *models.TweetsPayload, userId string) (string, error) {
 
 	var id string
-	if payload == nil || payload.Content == "" || userId == "" {
+	if payload == nil || userId == "" {
 		return "", fmt.Errorf("create tweets: necessary data not provided userId = %v content = %+v", userId, payload)
 	}
 	err := db.QueryRowx("INSERT INTO tweets(content,userId, visibility) VALUES($1,$2,$3) RETURNING id", payload.Content, userId, payload.Visibility).Scan(&id)
