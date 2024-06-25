@@ -52,14 +52,14 @@ type TweetImage struct {
 }
 
 type UserData struct {
-	Id        string    `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	ImageId   any       `json:"imageId"` //profile image id
-	CreatedAt time.Time `json:"createdAt"`
-	Role      string    `json:"role"`
-	LastName  string    `json:"lastName"`
-	FirstName string    `json:"firstName"`
+	Id        string    `json:"id" db:"id"`
+	Username  string    `json:"username" db:"username"`
+	Email     string    `json:"email" db:"email"`
+	ImageId   any       `json:"imageId" db:"image_id"` //profile image id
+	CreatedAt time.Time `json:"createdAt"  db:"created_at"`
+	Role      string    `json:"role" db:"role"`
+	LastName  string    `json:"lastName" db:"last_name"`
+	FirstName string    `json:"firstName" db:"first_name"`
 }
 
 type ProfileImage struct {
