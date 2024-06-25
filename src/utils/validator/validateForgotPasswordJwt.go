@@ -7,12 +7,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type OtpJwtData struct {
-	Otp    string
+type ForgotPasswordVal struct {
+	Email  string
 	UserId string
+	OtpId  string
 }
 
-func ValidateOtpJwt(jwtToken string) (*OtpJwtData, error) {
+func ValidateForgetPasswordJwt(jwtToken string) (*ForgotPasswordVal, error) {
 	tokenString := os.Getenv("SECRET")
 
 	if len(tokenString) < 30 {
@@ -31,14 +32,16 @@ func ValidateOtpJwt(jwtToken string) (*OtpJwtData, error) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		otp, _ := claims["otp"].(string)
+		email, _ := claims["email"].(string)
 		userId, _ := claims["userId"].(string)
-
-		return &OtpJwtData{
-			Otp:    otp,
+		otpId, _ := claims["otpId"].(string)
+		return &ForgotPasswordVal{
+			Email:  email,
 			UserId: userId,
+			OtpId:  otpId,
 		}, nil
 	}
 
 	return nil, fmt.Errorf("invlaid token")
+
 }

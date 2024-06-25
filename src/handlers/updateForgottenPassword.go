@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -50,9 +49,8 @@ func UpdateForgottenPasswordHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		//  validating otp auth token
-		otpAuthToken := r.Header.Get("otp_auth_x_clone")
-		if otpAuthToken == "" {
+		otpAuthToken := r.Header.Get("change_password_x_clone")
+		if otpAuthToken == "" || otpAuthToken == "undefined" {
 			encoder.ResponseWriter(w, http.StatusUnauthorized, models.ErrorResponse{
 				Status: http.StatusUnauthorized,
 				Res:    models.Message{Message: "Otp Authorization token not provided"},
@@ -60,65 +58,7 @@ func UpdateForgottenPasswordHandler(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		// decoding necessary data from otp
-		jwtData, err := validator.ValidateOtpJwt(otpAuthToken)
-		if err != nil {
-			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
-				Status: http.StatusBadRequest,
-				Res:    models.Message{Message: err.Error()},
-			})
-			return
-		}
-
-		// getting otp associated with user
-		otpData, err := user.GetOtpWithUser(db, jwtData.UserId)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				encoder.ResponseWriter(w, http.StatusNotFound, models.ErrorResponse{
-					Status: http.StatusNotFound,
-					Res:    models.Message{Message: "otp not found"},
-				})
-			} else {
-				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-					Status: http.StatusInternalServerError,
-					Res:    models.Message{Message: err.Error()},
-				})
-			}
-			return
-		}
-
-		// confirming  otp from req against database
-		err, ok := validator.ConfirmOtp(data.Otp, otpData.Otp, otpData.ExpiresAt)
-
-		if !ok {
-			//checking if the error was or not the expired otp error
-			if err.Error() != "expired otp" {
-				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-					Status: http.StatusInternalServerError,
-					Res:    models.Message{Message: "invalid opt, try again!"},
-				})
-				return
-			}
-
-			//deleting the expired otp from the database
-
-			deletionErr := user.DeleteOtp(db, jwtData.UserId)
-			if deletionErr != nil {
-				encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
-					Status: http.StatusInternalServerError,
-					Res:    models.Message{Message: deletionErr.Error()},
-				})
-				return
-			}
-
-			//sending the error  for expired otp.
-			encoder.ResponseWriter(w, http.StatusBadRequest, models.ErrorResponse{
-				Status: http.StatusBadRequest,
-				Res:    models.Message{Message: "expired otp. Please request a new one"},
-			})
-			return
-		}
-
+		jwtData, err := validator.ValidateForgetPasswordJwt(otpAuthToken)
 		//updating user password
 		updatePasswordErr := user.UpdatePassword(db, jwtData.UserId, encoder.HashPassword(data.NewPassword))
 		if updatePasswordErr != nil {
@@ -144,7 +84,7 @@ func UpdateForgottenPasswordHandler(db *sqlx.DB) http.HandlerFunc {
 			if err != nil {
 				log.Printf("Error UpdateForgonPass: %s", err.Error())
 			}
-		}(otpData.Email)
+		}(jwtData.Email)
 
 		// deleting otp of the user
 		deleteOtpErr := user.DeleteOtp(db, jwtData.UserId)
@@ -157,7 +97,7 @@ func UpdateForgottenPasswordHandler(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		//signing new jwt token with login credentials
-		loginJwtToken, err := encoder.CreateJwt(otpData.Email, otpData.UserId)
+		loginJwtToken, err := encoder.CreateJwt(jwtData.Email, jwtData.UserId)
 		if err != nil {
 			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 				Status: http.StatusInternalServerError,
@@ -177,7 +117,7 @@ func UpdateForgottenPasswordHandler(db *sqlx.DB) http.HandlerFunc {
 
 		//deleting otp auth cookie
 		deleteCookie := &http.Cookie{
-			Name:     "otp_auth_x_clone",
+			Name:     "change_password_x_clone",
 			Value:    "",
 			Path:     "/",
 			Expires:  time.Unix(0, 0),

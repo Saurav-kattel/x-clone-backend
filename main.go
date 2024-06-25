@@ -30,7 +30,7 @@ func main() {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
-		AllowedHeaders:   []string{"Content-Type", "auth_token_x_clone"},
+		AllowedHeaders:   []string{"Content-Type", "auth_token_x_clone", "otp_auth_x_clone", "change_password_x_clone"},
 		AllowCredentials: true,
 		Debug:            false,
 	})

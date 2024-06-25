@@ -29,6 +29,7 @@ func Routers(db *sqlx.DB) *http.ServeMux {
 	router.Handle("/api/v1/user/cover/image/get", unAuthStack(GetCoverPhotoHandler(db)))
 	router.Handle("/api/v1/user/followers", unAuthStack(GetFollowerList(db)))
 	router.Handle("/api/v1/user/following", unAuthStack(GetFollowingList(db)))
+	router.Handle("/api/v1/user/verify/otp", unAuthStack(VerifyOtp(db)))
 
 	router.Handle("/api/v1/notification/get", authStack(GetNotifications(db)))
 	router.Handle("/api/v1/notification/status/update", unAuthStack(UpdateNotificationHandler(db)))

@@ -131,13 +131,6 @@ func ValidatePayload(payload interface{}) *models.ValidatorResponse {
 		}
 
 	case *models.UpdateForgottenPasswordPayload:
-		if len(p.Otp) != 4 {
-			return &models.ValidatorResponse{
-				Field:   "otp",
-				Message: "otp must be the length of 4",
-			}
-		}
-
 		if p.NewPassword == "" {
 			return &models.ValidatorResponse{
 				Field:   "new password",
