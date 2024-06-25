@@ -18,10 +18,13 @@ func GetTweets(db *sqlx.DB, pageNumber, pageSize int, vis, userId string) ([]mod
            JOIN users u ON t.userid = u.id
            WHERE (t.visibility = $3)
            OR  
-		(t.userid IN  ( SELECT followee_id FROM followers WHERE follower_id = $4) 
-			AND 
-			t.visibility IN ('public' ,'followers')
-		) 
+	(
+		t.userid IN  ( SELECT followee_id FROM followers WHERE follower_id = $4) 
+		AND 
+		t.visibility IN ('public' ,'followers')
+	) OR (
+		t.userid = $4 AND t.visibility  IN ('public','followers')
+	)
 	   ORDER BY t.created_at DESC
            LIMIT $1 OFFSET $2 `
 
