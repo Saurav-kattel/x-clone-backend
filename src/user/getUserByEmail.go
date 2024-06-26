@@ -1,8 +1,6 @@
 package user
 
 import (
-	"log"
-
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/models"
 )
@@ -23,7 +21,6 @@ func GetUserByEmail(db *sqlx.DB, email string) (*models.User, error) {
 	)
 
 	if err != nil {
-		log.Print("DB ERROR: " + err.Error())
 		return nil, err
 	}
 

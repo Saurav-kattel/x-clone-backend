@@ -1,8 +1,6 @@
 package tweets
 
 import (
-	"log"
-
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/models"
 )
@@ -41,11 +39,8 @@ OFFSET $3;
 
 	err := db.Select(&tweets, query, username, pageSize, offset, vis)
 	if err != nil {
-		log.Printf("Error executing query: %v\n", err)
 		return nil, err
 	}
-
-	log.Printf("Query result: %+v\n", tweets)
 
 	return &tweets, nil
 }

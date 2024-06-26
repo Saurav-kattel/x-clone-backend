@@ -1,8 +1,6 @@
 package tweets
 
 import (
-	"log"
-
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/models"
 )
@@ -30,7 +28,6 @@ func GetTweets(db *sqlx.DB, pageNumber, pageSize int, vis, userId string) ([]mod
 
 	err := db.Select(&tweets, query, pageSize, offset, vis, userId)
 	if err != nil {
-		log.Printf("Error executing query: %v", err)
 		return nil, err
 	}
 

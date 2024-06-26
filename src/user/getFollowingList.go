@@ -1,8 +1,6 @@
 package user
 
 import (
-	"log"
-
 	"github.com/jmoiron/sqlx"
 	"x-clone.com/backend/src/models"
 )
@@ -15,6 +13,5 @@ func GetFollowingList(db *sqlx.DB, userName string) (*[]models.FollowerList, err
 		return nil, err
 	}
 
-	log.Print("twere", data)
 	return &data, nil
 }

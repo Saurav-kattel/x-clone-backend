@@ -1,7 +1,6 @@
 package user
 
 import (
-	"log"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -40,11 +39,8 @@ func GetOtpWithUser(db *sqlx.DB, userId string) (*Data, error) {
 	)
 
 	if err != nil {
-		log.Print("Error occured", err)
 		return nil, err
 	}
-
-	log.Print(data)
 
 	return &data, nil
 }

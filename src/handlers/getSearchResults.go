@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/jmoiron/sqlx"
@@ -38,7 +37,6 @@ func GetUsersSearchResult(db *sqlx.DB) http.HandlerFunc {
 
 		query = fmt.Sprintf("%%%s%%", query)
 		data, err := user.SearchResult(db, query)
-		log.Print(query)
 		if err != nil {
 			encoder.ResponseWriter(w, http.StatusInternalServerError, models.ErrorResponse{
 				Status: http.StatusInternalServerError,

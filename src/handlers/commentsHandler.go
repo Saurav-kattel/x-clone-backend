@@ -63,6 +63,7 @@ func handleReply(db *sqlx.DB, w http.ResponseWriter, data *models.Comment, user 
 				})
 				return
 			}
+
 			notificationMsg := fmt.Sprintf("replied to your comment")
 			go notification.CreateNotification(db, &user.Id, &data.RepliedTO, &notificationMsg, &data.TweetId, "reply")
 		} else {
